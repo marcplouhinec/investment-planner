@@ -33,6 +33,7 @@ body {
 
 #sim-results {
     grid-area: sim-results;
+    padding: 8px;
 }
 
 
@@ -42,4 +43,12 @@ body {
 
 #sim-config .codeflask {
     position: relative !important;
+}
+
+/*
+ Simulation results
+ */
+
+#sim-results > h1 {
+    font-size: 1.5rem;
 }
