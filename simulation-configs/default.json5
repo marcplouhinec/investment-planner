@@ -1,0 +1,34 @@
+{
+  simulation: {
+    historicalStartYearMonth: "1970-01",
+    startYearMonth: "2021-07",
+    endYearMonth: "2065-01"
+  },
+  portfolioInvestments: [
+    {
+      assetCode: "FUND_001",
+      phase1InitialWeight: 60,
+      phase1FinalWeight: 55,
+      phase2StartYearMonth: "2035-01",
+      phase2FinalWeight: 20,
+      phase3StartYearMonth: "2035-01",
+      phase3FinalWeight: 20,
+      enabled: true
+    }
+  ],
+  retirement: {
+    startYearMonth: "2050-01",
+    monthlyPensionInUsd: 5000,
+    pensionAnnualInflation: 0.03
+  },
+  savings: [
+    {
+      yearMonth: "2021-07",
+      amountInUsd: "3000"
+    },
+    {
+      yearMonth: "2021-10",
+      amountInUsd: "3000"
+    },
+  ]
+}

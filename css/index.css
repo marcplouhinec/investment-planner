@@ -1,0 +1,45 @@
+/*
+ General layout
+ */
+
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+
+    display: grid;
+    grid-template:
+        [row1-start] "top-nav-bar top-nav-bar" 40px [row1-end]
+        [row2-start] "sim-config sim-results" auto [row2-end]
+        / 1fr 2fr;
+}
+
+#top-nav-bar {
+    grid-area: top-nav-bar;
+    background-color: #212529;
+    color: white;
+    font-size: 1.25rem;
+    padding-left: 8px;
+    display: flex;
+    align-items: center;
+}
+
+#sim-config {
+    grid-area: sim-config;
+    border-right: 1px solid #212529;
+}
+
+#sim-results {
+    grid-area: sim-results;
+}
+
+
+/*
+ Simulation configuration
+ */
+
+#sim-config .codeflask {
+    position: relative !important;
+}
