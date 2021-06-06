@@ -1,7 +1,6 @@
 {
-  simulation: {
-    historicalStartYearMonth: "1970-01",
-    startYearMonth: "2021-07",
+  scope: {
+    startYearMonth: "1970-01",
     endYearMonth: "2065-01"
   },
   portfolioInvestments: [
