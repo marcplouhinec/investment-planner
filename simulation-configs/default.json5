@@ -6,12 +6,14 @@
   portfolioInvestments: [
     {
       assetCode: "FUND_001",
+      phase1StartYearMonth: "2021-07",
       phase1InitialWeight: 60,
       phase1FinalWeight: 55,
       phase2StartYearMonth: "2035-01",
       phase2FinalWeight: 20,
-      phase3StartYearMonth: "2035-01",
+      phase3StartYearMonth: "2050-01",
       phase3FinalWeight: 20,
+      phase3EndYearMonth: "2065-01",
       enabled: true
     }
   ],

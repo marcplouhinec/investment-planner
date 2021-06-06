@@ -6,6 +6,7 @@ class Scope {
      * @param {{
      *     startYearMonth: YearMonth,
      *     endYearMonth: YearMonth,
+     *     portfolioInvestmentStartYearMonth: YearMonth,
      * }=} properties
      */
     constructor(properties) {

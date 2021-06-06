@@ -35,7 +35,7 @@ const simulationConfigController = {
 
         if (simulationConfig) {
             simulationConfigService.updateSimulation(simulationConfig);
-            this._updateMessage('Simulation updated (' + new Date().toISOString() + ')', 'INFO');
+            this._updateMessage('Simulation updated at ' + new Date().toISOString(), 'INFO');
         }
     },
 

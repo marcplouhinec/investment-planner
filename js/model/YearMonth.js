@@ -18,6 +18,95 @@ class YearMonth {
     }
 
     /**
+     * @param {YearMonth} yearMonth
+     * @return boolean
+     */
+    isBefore(yearMonth) {
+        return this.year < yearMonth.year || (this.year === yearMonth.year && this.month < yearMonth.month);
+    }
+
+    /**
+     * @param {YearMonth} yearMonth
+     * @return boolean
+     */
+    isAfter(yearMonth) {
+        return yearMonth.isBefore(this);
+    }
+
+    /**
+     * @param {YearMonth} yearMonth
+     * @return boolean
+     */
+    equals(yearMonth) {
+        return this.year === yearMonth.year && this.month === yearMonth.month;
+    }
+
+    /**
+     * @return {string}
+     */
+    toString() {
+        return this.year + '-' + (this.month < 10 ? '0' : '') + this.month;
+    }
+
+    /**
+     * @param {YearMonth} startIncl
+     * @param {YearMonth} endIncl
+     * @return {YearMonth[]}
+     */
+    static generateRangeBetween(startIncl, endIncl) {
+        /** @type {YearMonth[]} */
+        const yearMonths = [];
+
+        for (let year = startIncl.year; year <= endIncl.year; year++) {
+            const startMonth = year === startIncl.year ? startIncl.month : 1;
+            const endMonth = year === endIncl.year ? endIncl.month : 12;
+            for (let month = startMonth; month <= endMonth; month++) {
+                yearMonths.push(new YearMonth({
+                    year: year,
+                    month: month
+                }));
+            }
+        }
+
+        return yearMonths;
+    }
+
+    /**
+     * @param {YearMonth} startIncl
+     * @param {YearMonth} endIncl
+     * @return {number}
+     */
+    static nbMonthsBetween(startIncl, endIncl) {
+        return (endIncl.year - startIncl.year) * 12 + endIncl.month - startIncl.month;
+    }
+
+    /**
+     * Useful for sorting an array of {@link YearMonth}s in the ascending order.
+     *
+     * @param {YearMonth} yearMonth1
+     * @param {YearMonth} yearMonth2
+     * @return {Number}
+     */
+    static compareAsc(yearMonth1, yearMonth2) {
+        const yearDiff = yearMonth1.year - yearMonth2.year;
+        if (yearDiff !== 0) {
+            return yearDiff;
+        }
+        return yearMonth1.month - yearMonth2.month;
+    }
+
+    /**
+     * Useful for sorting an array of {@link YearMonth}s in the descending order.
+     *
+     * @param {YearMonth} yearMonth1
+     * @param {YearMonth} yearMonth2
+     * @return {Number}
+     */
+    static compareDesc(yearMonth1, yearMonth2) {
+        return YearMonth.compareAsc(yearMonth2, yearMonth1);
+    }
+
+    /**
      * @param {string} value
      * @return {{
      *     year: number,

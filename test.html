@@ -17,9 +17,12 @@
     mocha.checkLeaks();
 </script>
 <script type="module" src="test-js/model/yearMonthTest.js"></script>
+<script type="module" src="test-js/model/portfolioInvestmentTest.js"></script>
 <script type="module" src="test-js/facade/converter/simulationConfigConverterTest.js"></script>
 <script class="mocha-exec">
-    mocha.run();
+    window.onload = () => {
+        mocha.run();
+    };
 </script>
 </body>
 </html>
