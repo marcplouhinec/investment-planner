@@ -38,7 +38,7 @@ class PortfolioInvestment {
         /** @type {YearMonth} */
         this.phase3EndYearMonth = new YearMonth(sanitizedProperties.phase3EndYearMonth);
         /** @type {boolean} */
-        this.enabled = sanitizedProperties.enabled || true;
+        this.enabled = typeof sanitizedProperties.enabled === 'boolean' ? sanitizedProperties.enabled : true;
     }
 
     /**

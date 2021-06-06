@@ -57,15 +57,17 @@ const simulationResultsController = {
         // Draw the asset weight line chart
         const assetWeightLineChartData = {
             labels: yearMonths.map(it => it.toString()),
-            datasets: config.portfolioInvestments.map((investment, index) => {
-                const chartColor = this._CHART_COLORS[index % this._CHART_COLORS.length];
-                return {
-                    label: investment.assetCode,
-                    backgroundColor: chartColor.backgroundColor,
-                    borderColor: chartColor.borderColor,
-                    data: yearMonths.map(it => investment.computeWeightAt(it))
-                };
-            })
+            datasets: config.portfolioInvestments
+                .filter(it => it.enabled)
+                .map((investment, index) => {
+                    const chartColor = this._CHART_COLORS[index % this._CHART_COLORS.length];
+                    return {
+                        label: investment.assetCode,
+                        backgroundColor: chartColor.backgroundColor,
+                        borderColor: chartColor.borderColor,
+                        data: yearMonths.map(it => investment.computeWeightAt(it))
+                    };
+                })
         };
 
         if (this._assetWeightLineChart !== null) {
