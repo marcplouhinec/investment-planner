@@ -13,6 +13,7 @@ body {
     grid-template:
         [row1-start] "top-nav-bar top-nav-bar" 40px [row1-end]
         [row2-start] "sim-config sim-results" auto [row2-end]
+        [row3-start] "sim-config-message sim-results" 60px [row3-end]
         / 1fr 2fr;
 }
 
@@ -31,6 +32,13 @@ body {
     border-right: 1px solid #212529;
 }
 
+#sim-config-message {
+    grid-area: sim-config-message;
+    border-top: 1px solid #212529;
+    border-right: 1px solid #212529;
+    padding: 8px;
+}
+
 #sim-results {
     grid-area: sim-results;
     padding: 8px;
@@ -43,6 +51,16 @@ body {
 
 #sim-config .codeflask {
     position: relative !important;
+}
+
+.sim-config-message-info {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.sim-config-message-error {
+    background-color: #f8d7da;
+    color: #842029;
 }
 
 /*
