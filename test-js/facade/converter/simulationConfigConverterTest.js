@@ -25,20 +25,20 @@ describe('simulationConfigConverter', () => {
             assert.equal(simulationConfig.scope.endYearMonth.year, 2065);
             assert.equal(simulationConfig.scope.endYearMonth.month, 1);
 
-            assert.equal(simulationConfig.portfolioInvestments.length, 1);
+            assert.equal(simulationConfig.portfolioInvestments.length, 5);
 
             const portfolioInvestment = simulationConfig.portfolioInvestments[0];
-            assert.equal(portfolioInvestment.assetCode, "FUND_001");
+            assert.equal(portfolioInvestment.assetCode, "TOTAL_STOCK_MARKET");
             assert.equal(portfolioInvestment.phase1StartYearMonth.year, 2021);
             assert.equal(portfolioInvestment.phase1StartYearMonth.month, 7);
-            assert.equal(portfolioInvestment.phase1InitialWeight, 60);
+            assert.equal(portfolioInvestment.phase1InitialWeight, 55);
             assert.equal(portfolioInvestment.phase1FinalWeight, 55);
-            assert.equal(portfolioInvestment.phase2StartYearMonth.year, 2035);
+            assert.equal(portfolioInvestment.phase2StartYearMonth.year, 2025);
             assert.equal(portfolioInvestment.phase2StartYearMonth.month, 1);
             assert.equal(portfolioInvestment.phase2FinalWeight, 20);
-            assert.equal(portfolioInvestment.phase3StartYearMonth.year, 2050);
+            assert.equal(portfolioInvestment.phase3StartYearMonth.year, 2045);
             assert.equal(portfolioInvestment.phase3StartYearMonth.month, 1);
-            assert.equal(portfolioInvestment.phase3FinalWeight, 20);
+            assert.equal(portfolioInvestment.phase3FinalWeight, 12);
             assert.equal(portfolioInvestment.phase3EndYearMonth.year, 2065);
             assert.equal(portfolioInvestment.phase3EndYearMonth.month, 1);
             assert.equal(portfolioInvestment.enabled, true);

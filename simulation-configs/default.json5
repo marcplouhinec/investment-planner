@@ -5,14 +5,62 @@
   },
   portfolioInvestments: [
     {
-      assetCode: "FUND_001",
+      assetCode: "TOTAL_STOCK_MARKET",
       phase1StartYearMonth: "2021-07",
-      phase1InitialWeight: 60,
+      phase1InitialWeight: 55,
       phase1FinalWeight: 55,
-      phase2StartYearMonth: "2035-01",
+      phase2StartYearMonth: "2025-01",
       phase2FinalWeight: 20,
-      phase3StartYearMonth: "2050-01",
-      phase3FinalWeight: 20,
+      phase3StartYearMonth: "2045-01",
+      phase3FinalWeight: 12,
+      phase3EndYearMonth: "2065-01",
+      enabled: true
+    },
+    {
+      assetCode: "TOTAL_INTERNATIONAL_STOCK",
+      phase1StartYearMonth: "2021-07",
+      phase1InitialWeight: 35,
+      phase1FinalWeight: 35,
+      phase2StartYearMonth: "2025-01",
+      phase2FinalWeight: 13,
+      phase3StartYearMonth: "2045-01",
+      phase3FinalWeight: 8,
+      phase3EndYearMonth: "2065-01",
+      enabled: true
+    },
+    {
+      assetCode: "TOTAL_BOND_MARKET",
+      phase1StartYearMonth: "2021-07",
+      phase1InitialWeight: 7,
+      phase1FinalWeight: 7,
+      phase2StartYearMonth: "2025-01",
+      phase2FinalWeight: 36,
+      phase3StartYearMonth: "2045-01",
+      phase3FinalWeight: 41,
+      phase3EndYearMonth: "2065-01",
+      enabled: true
+    },
+    {
+      assetCode: "TOTAL_INTERNATIONAL_BOND",
+      phase1StartYearMonth: "2021-07",
+      phase1InitialWeight: 3,
+      phase1FinalWeight: 3,
+      phase2StartYearMonth: "2025-01",
+      phase2FinalWeight: 15,
+      phase3StartYearMonth: "2045-01",
+      phase3FinalWeight: 17,
+      phase3EndYearMonth: "2065-01",
+      enabled: true
+    },
+    {
+      assetCode: "SHORT_TERM_INFLATION_PROTECTED_SECURITIES",
+      phase1StartYearMonth: "2021-07",
+      phase1InitialWeight: 0,
+      phase1FinalWeight: 0,
+      phase2StartYearMonth: "2035-01",
+      phase2FinalWeight: 16,
+      phase3StartYearMonth: "2045-01",
+      phase3FinalWeight: 22,
       phase3EndYearMonth: "2065-01",
       enabled: true
     }
