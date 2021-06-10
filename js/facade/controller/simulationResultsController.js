@@ -35,6 +35,9 @@ const simulationResultsController = {
     /** @type {?Chart} */
     _assetWeightLineChart: null,
 
+    /** @type {?Chart} */
+    _assetWeightAreaChart: null,
+
     init: function () {
         // Initialize Chart.js
         Chart.register(...registerables);
@@ -119,15 +122,67 @@ const simulationResultsController = {
                 {
                     type: 'line',
                     options: {
+                        pointRadius: 0
+                    },
+                    data: assetWeightLineChartData
+                }
+            );
+        }
+
+        // Draw the asset weight area chart
+        /**
+         * @type {{
+         *     label: string,
+         *     backgroundColor: string,
+         *     borderColor: string,
+         *     fill: string,
+         *     data: number[]
+         * }[]}
+         */
+        const assetWeightAreaChartDatasets = [];
+        for (let i = 0; i < investmentAndPercentageByYearMonth.length; i++) {
+            const entry = investmentAndPercentageByYearMonth[i];
+            const chartColor = this._CHART_COLORS[i % this._CHART_COLORS.length];
+
+            assetWeightAreaChartDatasets.push({
+                label: entry.investment.assetCode,
+                backgroundColor: chartColor.borderColor,
+                borderColor: chartColor.borderColor,
+                fill: 'origin',
+                data: yearMonths.map((yearMonth, ymIndex) => {
+                    const previousValue = i === 0 ? 0 : assetWeightAreaChartDatasets[i - 1].data[ymIndex];
+                    return previousValue + entry.percentageByYearMonth.get(yearMonth);
+                })
+            });
+        }
+        const assetWeightAreaChartData = {
+            labels: yearMonths.map(it => it.toString()),
+            datasets: assetWeightAreaChartDatasets
+        };
+
+        if (this._assetWeightAreaChart !== null) {
+            this._assetWeightAreaChart.data = assetWeightAreaChartData;
+            this._assetWeightAreaChart.update();
+        } else {
+            this._assetWeightAreaChart = new Chart(
+                document.getElementById('asset-weight-area-chart'),
+                {
+                    type: 'line',
+                    options: {
                         pointRadius: 0,
+                        plugins: {
+                            filler: {
+                                propagate: false,
+                            }
+                        },
                         scales: {
                             y: {
                                 min: 0,
-                                max: 100
+                                max: 100,
                             }
                         }
                     },
-                    data: assetWeightLineChartData
+                    data: assetWeightAreaChartData
                 }
             );
         }
