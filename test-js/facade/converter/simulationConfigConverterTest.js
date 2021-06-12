@@ -13,6 +13,8 @@ describe('simulationConfigConverter', () => {
             assert.equal(simulationConfig.scope.endYearMonth.month, 0);
 
             assert.equal(simulationConfig.portfolioInvestments.length, 0);
+
+            assert.equal(simulationConfig.assets.length, 0);
         });
 
         it('should convert valid config', async function () {
@@ -42,6 +44,13 @@ describe('simulationConfigConverter', () => {
             assert.equal(portfolioInvestment.phase3EndYearMonth.year, 2065);
             assert.equal(portfolioInvestment.phase3EndYearMonth.month, 1);
             assert.equal(portfolioInvestment.enabled, true);
+
+            assert.equal(simulationConfig.assets.length, 1);
+            const asset = simulationConfig.assets[0];
+            assert.equal(asset.code, "TOTAL_STOCK_MARKET");
+            assert.equal(asset.historicalPricesFormat, "YAHOO_FINANCE_MONTHLY");
+            assert.equal(asset.historicalPricesPath,
+                "investment-assets/Vanguard Total Stock Market Index Fund ETF Shares - VTI.yf.csv");
         });
 
         it('should fail with invalid config', () => {

@@ -79,5 +79,12 @@
       yearMonth: "2021-10",
       amountInUsd: "3000"
     },
+  ],
+  assets: [
+    {
+      code: "TOTAL_STOCK_MARKET",
+      historicalPricesFormat: "YAHOO_FINANCE_MONTHLY",
+      historicalPricesPath: "investment-assets/Vanguard Total Stock Market Index Fund ETF Shares - VTI.yf.csv"
+    }
   ]
 }
