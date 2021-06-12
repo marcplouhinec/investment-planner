@@ -21,6 +21,21 @@ describe('historicalPriceReadingService', () => {
             assert.equal(prices[240].priceInUsd, 220.779999);
         });
 
+        it('should convert MSCI Monthly format', async function () {
+            const asset = new Asset({
+                code: "MSCI_ACWI_EX_USA",
+                historicalPricesFormat: "MSCI_MONTHLY",
+                historicalPricesPath: "investment-assets/MSCI ACWI ex USA Standard (Large+Mid Cap).msci.xls"
+            });
+
+            const prices = await historicalPriceReadingService.readHistoricalPrices(asset);
+            assert.equal(prices.length, 401);
+            assert.equal(prices[0].date.toString(), '1987-12-31');
+            assert.equal(prices[0].priceInUsd, 100.000);
+            assert.equal(prices[400].date.toString(), '2021-04-30');
+            assert.equal(prices[400].priceInUsd, 345.205);
+        });
+
         it('should fail with unknown format', async function () {
             const asset = new Asset({
                 code: "TOTAL_STOCK_MARKET",
