@@ -163,4 +163,37 @@ describe('YearMonth', () => {
             assert.equal(new YearMonth('2020-12').toString(), '2020-12');
         });
     });
+
+    describe('#nbDaysInMonth()', () => {
+        it('should work with non-null dates', () => {
+            assert.equal(new YearMonth('2021-01').nbDaysInMonth(), 31);
+            assert.equal(new YearMonth('2021-02').nbDaysInMonth(), 28);
+            assert.equal(new YearMonth('2021-03').nbDaysInMonth(), 31);
+            assert.equal(new YearMonth('2021-04').nbDaysInMonth(), 30);
+            assert.equal(new YearMonth('2021-05').nbDaysInMonth(), 31);
+            assert.equal(new YearMonth('2021-06').nbDaysInMonth(), 30);
+            assert.equal(new YearMonth('2021-07').nbDaysInMonth(), 31);
+            assert.equal(new YearMonth('2021-08').nbDaysInMonth(), 31);
+            assert.equal(new YearMonth('2021-09').nbDaysInMonth(), 30);
+            assert.equal(new YearMonth('2021-10').nbDaysInMonth(), 31);
+            assert.equal(new YearMonth('2021-11').nbDaysInMonth(), 30);
+            assert.equal(new YearMonth('2021-12').nbDaysInMonth(), 31);
+            assert.equal(new YearMonth('2000-02').nbDaysInMonth(), 29);
+        });
+    });
+
+    describe('#atDay()', () => {
+        it('should work with non-null day', () => {
+            assert.equal(new YearMonth('2021-05').atDay(11).toString(), '2021-05-11');
+        });
+    });
+
+    describe('#nbYearsUntil()', () => {
+        it('should work with non-null day', () => {
+            assert.equal(new YearMonth('2021-05').nbYearsUntil(new YearMonth('2021-05')), 0);
+            assert.equal(new YearMonth('2020-05').nbYearsUntil(new YearMonth('2021-05')), 1);
+            assert.equal(new YearMonth('2021-05').nbYearsUntil(new YearMonth('2020-05')), -1);
+            assert.equal(new YearMonth('2021-01').nbYearsUntil(new YearMonth('2021-07')), 0.5);
+        });
+    });
 });

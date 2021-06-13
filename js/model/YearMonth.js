@@ -1,3 +1,6 @@
+import {Year} from './Year.js';
+import {LocalDate} from './LocalDate.js';
+
 class YearMonth {
 
     /**
@@ -31,6 +34,43 @@ class YearMonth {
      */
     isAfter(yearMonth) {
         return yearMonth.isBefore(this);
+    }
+
+    /**
+     * @return {number} Number of days in the current month.
+     */
+    nbDaysInMonth() {
+        switch (this.month) {
+            case 2:
+                return (Year.isLeapYear(this.year) ? 29 : 28);
+            case 4:
+            case 6:
+            case 9:
+            case 11:
+                return 30;
+            default:
+                return 31;
+        }
+    }
+
+    /**
+     * @param {YearMonth} nextYearMonth
+     * @return {number} Number of years between this YearMonth and the nextYearMonth.
+     */
+    nbYearsUntil(nextYearMonth) {
+        return nextYearMonth.year - this.year + (nextYearMonth.month - this.month) / 12;
+    }
+
+    /**
+     * @param {number} day
+     * @return {LocalDate}
+     */
+    atDay(day) {
+        return new LocalDate({
+            year: this.year,
+            month: this.month,
+            day: day
+        });
     }
 
     /**

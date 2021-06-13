@@ -76,13 +76,14 @@ const historicalPriceReadingService = {
                 continue;
             }
 
+            const rawPrice = String(secondCell.w).replaceAll(',', '');
             historicalPrices.push(new HistoricalPrice({
                 date: new LocalDate({
                     year: Number(matched.groups['year']),
                     month: this._MONTHS.indexOf(matched.groups['month']) + 1,
                     day: Number(matched.groups['day'])
                 }),
-                priceInUsd: Number(secondCell.w)
+                priceInUsd: Number(rawPrice)
             }));
         }
 

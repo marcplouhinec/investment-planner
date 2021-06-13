@@ -1,3 +1,5 @@
+import {Year} from './Year.js';
+
 class LocalDate {
 
     /**
@@ -22,12 +24,75 @@ class LocalDate {
     }
 
     /**
+     * @param {LocalDate} nextLocalDate
+     * @return {number} Number of days between this date and the nextLocalDate.
+     */
+    nbDaysUntil(nextLocalDate) {
+        const nextDate = new Date(nextLocalDate.year, nextLocalDate.month - 1, nextLocalDate.day);
+        const thisDate = new Date(this.year, this.month - 1, this.day);
+        return Math.round((nextDate - thisDate) / (1000 * 60 * 60 * 24));
+    }
+
+    /**
+     * @param {LocalDate} nextLocalDate
+     * @return {number} Number of years between this date and the nextLocalDate.
+     */
+    nbYearsUntil(nextLocalDate) {
+        const startYear = Math.min(this.year, nextLocalDate.year);
+        const endYear = Math.max(this.year, nextLocalDate.year);
+
+        let nbRemainingDays = this.nbDaysUntil(nextLocalDate);
+        const sign = Math.sign(nbRemainingDays);
+        nbRemainingDays = Math.abs(nbRemainingDays);
+
+        let nbYears = 0;
+        let nbDaysPerYear = Year.isLeapYear(startYear) ? 366 : 365;
+
+        for (let y = startYear; y < endYear; y++) {
+            nbDaysPerYear = (Year.isLeapYear(y) ? 366 : 365);
+            nbRemainingDays = nbRemainingDays - nbDaysPerYear;
+            nbYears++;
+        }
+
+        return sign * (nbYears + nbRemainingDays / nbDaysPerYear);
+    }
+
+    /**
+     * @param {LocalDate} localDate
+     * @return boolean
+     */
+    equals(localDate) {
+        return this.year === localDate.year && this.month === localDate.month && this.day === localDate.day;
+    }
+
+    /**
      * @return {string}
      */
     toString() {
         return this.year
             + '-' + (this.month < 10 ? '0' : '') + this.month
             + '-' + (this.day < 10 ? '0' : '') + this.day;
+    }
+
+    /**
+     * @param {LocalDate[]} availableLocalDates
+     * @param {LocalDate} targetLocalDate
+     * @return {LocalDate} from availableLocalDates that is the closest to targetLocalDate.
+     */
+    static findClosestAvailableLocalDate(availableLocalDates, targetLocalDate) {
+        let closestAvailableLocalDate = null;
+        let minNbDays = 0;
+
+        for (let availableLocalDate of availableLocalDates) {
+            const nbDays = Math.abs(availableLocalDate.nbDaysUntil(targetLocalDate));
+
+            if (!closestAvailableLocalDate || minNbDays > nbDays) {
+                closestAvailableLocalDate = availableLocalDate;
+                minNbDays = nbDays;
+            }
+        }
+
+        return closestAvailableLocalDate;
     }
 
     /**
