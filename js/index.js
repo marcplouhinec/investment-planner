@@ -1,5 +1,7 @@
 import {simulationConfigController} from './facade/controller/simulationConfigController.js';
-import {simulationResultsController} from './facade/controller/simulationResultsController.js';
+import {portfolioAllocationController} from './facade/controller/portfolioAllocationController.js';
+import {portfolioSimulationController} from './facade/controller/portfolioSimulationController.js';
 
 simulationConfigController.init();
-simulationResultsController.init();
+portfolioAllocationController.init();
+portfolioSimulationController.init();

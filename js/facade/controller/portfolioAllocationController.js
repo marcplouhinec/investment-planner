@@ -2,35 +2,9 @@ import {Chart, registerables} from '../../../vendors/chart.js-3.3.2/dist/chart.e
 import {simulationConfigService} from '../../service/simulationConfigService.js';
 import {YearMonth} from '../../model/YearMonth.js';
 import {PortfolioInvestment} from "../../model/PortfolioInvestment.js";
+import {chartColorUtils} from "../utils/chartColorUtils.js";
 
-const simulationResultsController = {
-
-    /**
-     * @constant
-     * @type {{backgroundColor:string, borderColor:string}[]}
-     */
-    _CHART_COLORS: [
-        {
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            borderColor: 'rgba(54, 162, 235, 1)'
-        },
-        {
-            backgroundColor: 'rgba(255, 206, 86, 0.2)',
-            borderColor: 'rgba(255, 206, 86, 1)'
-        },
-        {
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)'
-        },
-        {
-            backgroundColor: 'rgba(153, 102, 255, 0.2)',
-            borderColor: 'rgba(153, 102, 255, 1)'
-        },
-        {
-            backgroundColor: 'rgba(255, 159, 64, 0.2)',
-            borderColor: 'rgba(255, 159, 64, 1)'
-        }
-    ],
+const portfolioAllocationController = {
 
     /** @type {?Chart} */
     _assetWeightLineChart: null,
@@ -103,7 +77,7 @@ const simulationResultsController = {
             labels: yearMonths.map(it => it.toString()),
             datasets: investmentAndPercentageByYearMonth
                 .map((it, index) => {
-                    const chartColor = this._CHART_COLORS[index % this._CHART_COLORS.length];
+                    const chartColor = chartColorUtils.getChartColorByIndex(index);
                     return {
                         label: it.investment.assetCode,
                         backgroundColor: chartColor.backgroundColor,
@@ -142,7 +116,7 @@ const simulationResultsController = {
         const assetWeightAreaChartDatasets = [];
         for (let i = 0; i < investmentAndPercentageByYearMonth.length; i++) {
             const entry = investmentAndPercentageByYearMonth[i];
-            const chartColor = this._CHART_COLORS[i % this._CHART_COLORS.length];
+            const chartColor = chartColorUtils.getChartColorByIndex(i);
 
             assetWeightAreaChartDatasets.push({
                 label: entry.investment.assetCode,
@@ -189,4 +163,4 @@ const simulationResultsController = {
     }
 };
 
-export {simulationResultsController};
+export {portfolioAllocationController};

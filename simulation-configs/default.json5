@@ -85,6 +85,26 @@
       code: "TOTAL_STOCK_MARKET",
       historicalPricesFormat: "YAHOO_FINANCE_MONTHLY",
       historicalPricesPath: "investment-assets/Vanguard Total Stock Market Index Fund ETF Shares - VTI.yf.csv"
+    },
+    {
+      code: "TOTAL_INTERNATIONAL_STOCK",
+      historicalPricesFormat: "YAHOO_FINANCE_MONTHLY",
+      historicalPricesPath: "investment-assets/Vanguard Total International Stock Index Fund ETF Shares - VXUS.yf.csv"
+    },
+    {
+      code: "TOTAL_BOND_MARKET",
+      historicalPricesFormat: "YAHOO_FINANCE_MONTHLY",
+      historicalPricesPath: "investment-assets/Vanguard Total Bond Market Index Fund ETF Shares (BND).yf.csv"
+    },
+    {
+      code: "TOTAL_INTERNATIONAL_BOND",
+      historicalPricesFormat: "YAHOO_FINANCE_MONTHLY",
+      historicalPricesPath: "investment-assets/Vanguard Total International Bond Index Fund ETF Shares (BNDX).yf.csv"
+    },
+    {
+      code: "SHORT_TERM_INFLATION_PROTECTED_SECURITIES",
+      historicalPricesFormat: "YAHOO_FINANCE_MONTHLY",
+      historicalPricesPath: "investment-assets/Vanguard Short-Term Inflation-Protected Securities Index Fund ETF Shares (VTIP).yf.csv"
     }
   ]
 }

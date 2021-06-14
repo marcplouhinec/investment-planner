@@ -1,4 +1,4 @@
-import {historicalPriceReadingService} from '../../js/service/historicalPriceParsingService.js'
+import {historicalPriceReadingService} from '../../js/service/historicalPriceReadingService.js'
 import {Asset} from '../../js/model/Asset.js'
 
 const assert = chai.assert;

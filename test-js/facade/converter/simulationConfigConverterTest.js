@@ -45,7 +45,7 @@ describe('simulationConfigConverter', () => {
             assert.equal(portfolioInvestment.phase3EndYearMonth.month, 1);
             assert.equal(portfolioInvestment.enabled, true);
 
-            assert.equal(simulationConfig.assets.length, 1);
+            assert.equal(simulationConfig.assets.length, 5);
             const asset = simulationConfig.assets[0];
             assert.equal(asset.code, "TOTAL_STOCK_MARKET");
             assert.equal(asset.historicalPricesFormat, "YAHOO_FINANCE_MONTHLY");

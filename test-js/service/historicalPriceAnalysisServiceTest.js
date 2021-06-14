@@ -1,5 +1,5 @@
 import {historicalPriceAnalysisService} from '../../js/service/historicalPriceAnalysisService.js'
-import {historicalPriceReadingService} from '../../js/service/historicalPriceParsingService.js'
+import {historicalPriceReadingService} from '../../js/service/historicalPriceReadingService.js'
 import {Asset} from '../../js/model/Asset.js'
 import {YearMonth} from '../../js/model/YearMonth.js'
 
