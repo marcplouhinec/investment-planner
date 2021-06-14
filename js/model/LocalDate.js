@@ -61,6 +61,24 @@ class LocalDate {
      * @param {LocalDate} localDate
      * @return boolean
      */
+    isBefore(localDate) {
+        return this.year < localDate.year
+            || (this.year === localDate.year && this.month < localDate.month)
+            || (this.year === localDate.year && this.month === localDate.month && this.day < localDate.day);
+    }
+
+    /**
+     * @param {LocalDate} localDate
+     * @return boolean
+     */
+    isAfter(localDate) {
+        return localDate.isBefore(this);
+    }
+
+    /**
+     * @param {LocalDate} localDate
+     * @return boolean
+     */
     equals(localDate) {
         return this.year === localDate.year && this.month === localDate.month && this.day === localDate.day;
     }

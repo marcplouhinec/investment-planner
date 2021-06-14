@@ -44,6 +44,28 @@ describe('LocalDate', () => {
         });
     });
 
+    describe('#isBefore()', () => {
+        it('should work with non-null dates', () => {
+            assert.equal(new LocalDate('2021-02-01').isBefore(new LocalDate('2021-05-01')), true);
+            assert.equal(new LocalDate('2020-12-01').isBefore(new LocalDate('2021-05-01')), true);
+            assert.equal(new LocalDate('2020-12-01').isBefore(new LocalDate('2020-12-06')), true);
+            assert.equal(new LocalDate('2020-12-01').isBefore(new LocalDate('2020-10-01')), false);
+            assert.equal(new LocalDate('2021-10-01').isBefore(new LocalDate('2020-10-01')), false);
+            assert.equal(new LocalDate('2021-10-25').isBefore(new LocalDate('2021-10-01')), false);
+        });
+    });
+
+    describe('#isAfter()', () => {
+        it('should work with non-null dates', () => {
+            assert.equal(new LocalDate('2021-02-01').isAfter(new LocalDate('2021-05-01')), false);
+            assert.equal(new LocalDate('2020-12-01').isAfter(new LocalDate('2021-05-01')), false);
+            assert.equal(new LocalDate('2020-12-01').isAfter(new LocalDate('2020-12-06')), false);
+            assert.equal(new LocalDate('2020-12-01').isAfter(new LocalDate('2020-10-01')), true);
+            assert.equal(new LocalDate('2021-10-01').isAfter(new LocalDate('2020-10-01')), true);
+            assert.equal(new LocalDate('2021-10-25').isAfter(new LocalDate('2021-10-01')), true);
+        });
+    });
+
     describe('#equals()', () => {
         it('should work with non-null dates', () => {
             assert.equal(new LocalDate('2021-02-01').equals(new LocalDate('2021-02-01')), true);
