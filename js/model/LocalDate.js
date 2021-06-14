@@ -1,4 +1,5 @@
 import {Year} from './Year.js';
+import {YearMonth} from "./YearMonth.js";
 
 class LocalDate {
 
@@ -90,6 +91,16 @@ class LocalDate {
         return this.year
             + '-' + (this.month < 10 ? '0' : '') + this.month
             + '-' + (this.day < 10 ? '0' : '') + this.day;
+    }
+
+    /**
+     * @return {YearMonth}
+     */
+    toYearMonth() {
+        return new YearMonth({
+            year: this.year,
+            month: this.month
+        });
     }
 
     /**

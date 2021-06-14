@@ -42,6 +42,7 @@ body {
 #sim-results {
     grid-area: sim-results;
     padding: 8px;
+    overflow-y: auto;
 }
 
 
