@@ -14,7 +14,7 @@ const portfolioSimulationController = {
     _assetByCode: new Map(),
     /** @type {Map<Asset, HistoricalPrice[]>} */
     _historicalPricesByAsset: new Map(),
-    /** @type {Map<Asset, Map<LocalDate, HistoricalPrice>>} */
+    /** @type {Map<Asset, Map<string, HistoricalPrice>>} */
     _historicalPriceByLocalDateByAsset: new Map(),
     /** @type {Map<Asset, {performance: number, stdDev: number}>} */
     _annualizedPerfAndStdDevByAsset: new Map(),
@@ -51,11 +51,7 @@ const portfolioSimulationController = {
         for (let asset of config.assets) {
             if (!this._historicalPriceByLocalDateByAsset.has(asset)) {
                 const historicalPrices = this._historicalPricesByAsset.get(asset);
-                const historicalPriceByLocalDate = new Map();
-                for (let historicalPrice of historicalPrices) {
-                    historicalPriceByLocalDate.set(historicalPrice.date, historicalPrice);
-                }
-                this._historicalPriceByLocalDateByAsset.set(asset, historicalPriceByLocalDate);
+                this._historicalPriceByLocalDateByAsset.set(asset, HistoricalPrice.mapByStringDate(historicalPrices));
             }
         }
 
@@ -156,11 +152,44 @@ const portfolioSimulationController = {
                                 return null;
                             }
                             const date = LocalDate.findClosestAvailableLocalDate(dates, localDate);
-                            return historicalPriceByLocalDate.get(date).priceInUsd;
+                            return historicalPriceByLocalDate.get(date.toString()).priceInUsd;
                         })
                     };
                 })
         };
+
+        // TODO
+        const simulatedDataSet = enabledInvestments
+            .map((investment, index) => {
+                const asset = this._assetByCode.get(investment.assetCode);
+                const historicalPrices = this._historicalPricesByAsset.get(asset);
+
+                const result = historicalPriceAnalysisService.calculateRegression(
+                    historicalPrices, config.scope.startYearMonth, config.scope.endYearMonth);
+
+                const simulatedHistoricalPrices = historicalPriceAnalysisService.generateMonthlyEstimations(
+                    result, new YearMonth('2031-06'));
+
+                const simulatedHistoricalPriceByYearMonth = new Map();
+                for (let simulatedHistoricalPrice of simulatedHistoricalPrices) {
+                    simulatedHistoricalPriceByYearMonth.set(simulatedHistoricalPrice.yearMonth.toString(), simulatedHistoricalPrice);
+                }
+
+                const chartColor = chartColorUtils.getChartColorByIndex(index);
+                return {
+                    label: investment.assetCode + '_SIMULATED',
+                    backgroundColor: chartColor.backgroundColor,
+                    borderColor: chartColor.borderColor,
+                    data: yearMonths.map(yearMonth => {
+                        const simulatedHistoricalPrice = simulatedHistoricalPriceByYearMonth.get(yearMonth.toString());
+                        if (!simulatedHistoricalPrice) {
+                            return null;
+                        }
+                        return simulatedHistoricalPrice.avgPriceInUsd;
+                    })
+                };
+            });
+        portfolioAssetPriceLineChartData.datasets = portfolioAssetPriceLineChartData.datasets.concat(simulatedDataSet);
 
         if (this._portfolioAssetPriceLineChart !== null) {
             this._portfolioAssetPriceLineChart.data = portfolioAssetPriceLineChartData;

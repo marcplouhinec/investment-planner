@@ -175,4 +175,38 @@ describe('LocalDate', () => {
                 '2021-05-15');
         });
     });
+
+    describe('#toClosestYearMonth()', () => {
+        it('should work with non-null dates', () => {
+            assert.equal(new LocalDate('2021-02-01').toClosestYearMonth().toString(), '2021-02');
+            assert.equal(new LocalDate('2021-02-10').toClosestYearMonth().toString(), '2021-02');
+            assert.equal(new LocalDate('2021-02-14').toClosestYearMonth().toString(), '2021-02');
+            assert.equal(new LocalDate('2021-02-15').toClosestYearMonth().toString(), '2021-03');
+            assert.equal(new LocalDate('2021-02-16').toClosestYearMonth().toString(), '2021-03');
+            assert.equal(new LocalDate('2021-02-28').toClosestYearMonth().toString(), '2021-03');
+            assert.equal(new LocalDate('2021-12-05').toClosestYearMonth().toString(), '2021-12');
+            assert.equal(new LocalDate('2021-12-30').toClosestYearMonth().toString(), '2022-01');
+        });
+    });
+
+    describe('#compareAsc()', () => {
+        it('should work with multiple dates', () => {
+            const dates = [
+                new LocalDate('2021-05-14'),
+                new LocalDate('2021-05-12'),
+                new LocalDate('2021-04-28'),
+                new LocalDate('2021-06-28'),
+                new LocalDate('2020-10-01'),
+            ];
+
+            const sortedDates = dates.sort(LocalDate.compareAsc);
+
+            assert.equal(sortedDates.length, 5);
+            assert.equal(sortedDates[0].toString(), '2020-10-01');
+            assert.equal(sortedDates[1].toString(), '2021-04-28');
+            assert.equal(sortedDates[2].toString(), '2021-05-12');
+            assert.equal(sortedDates[3].toString(), '2021-05-14');
+            assert.equal(sortedDates[4].toString(), '2021-06-28');
+        });
+    });
 });

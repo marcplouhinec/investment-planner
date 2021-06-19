@@ -2,6 +2,8 @@ import {historicalPriceAnalysisService} from '../../js/service/historicalPriceAn
 import {historicalPriceReadingService} from '../../js/service/historicalPriceReadingService.js'
 import {Asset} from '../../js/model/Asset.js'
 import {YearMonth} from '../../js/model/YearMonth.js'
+import {LocalDate} from "../../js/model/LocalDate.js";
+import {RegressionResult} from "../../js/model/RegressionResult.js";
 
 const assert = chai.assert;
 const expect = chai.expect;
@@ -98,6 +100,46 @@ describe('historicalPriceAnalysisService', () => {
             performance = historicalPriceAnalysisService.calculateAnnualizedPerformanceStandardDeviation(
                 prices, new YearMonth('2011-05'), new YearMonth('2021-05')).toFixed(4);
             assert.equal(performance, 0.1382);
+        });
+    });
+
+    describe('#calculateRegression()', () => {
+        it('should calculate regression with TOTAL_STOCK_MARKET', async function () {
+            // Load the historical prices
+            const asset = new Asset({
+                code: "TOTAL_STOCK_MARKET",
+                historicalPricesFormat: "YAHOO_FINANCE_MONTHLY",
+                historicalPricesPath: "investment-assets/Vanguard Total Stock Market Index Fund ETF Shares - VTI.yf.csv"
+            });
+            const prices = await historicalPriceReadingService.readHistoricalPrices(asset);
+
+            // Calculate the regression
+            const result = historicalPriceAnalysisService.calculateRegression(
+                prices, new YearMonth('1970-01'), new YearMonth('2022-01'));
+
+            assert.equal(result.startDate.toString(), '2001-07-01');
+            assert.equal(result.endDate.toString(), '2021-06-01');
+            assert.equal(result.startPriceInUsd, 40.41634212096807);
+            assert.equal(result.monthlyPerformance, 0.005678686934672772);
+        });
+    });
+
+    describe('#generateMonthlyEstimations()', () => {
+        it('should generate for few months', () => {
+            const result = new RegressionResult(
+                new LocalDate('2001-01-01'), new LocalDate('2010-01-01'), 100, 0.006);
+            const estimations = historicalPriceAnalysisService.generateMonthlyEstimations(
+                result, new YearMonth('2001-04'));
+
+            assert.equal(estimations.length, 4);
+            assert.equal(estimations[0].yearMonth.toString(), '2001-01');
+            assert.equal(estimations[1].yearMonth.toString(), '2001-02');
+            assert.equal(estimations[2].yearMonth.toString(), '2001-03');
+            assert.equal(estimations[3].yearMonth.toString(), '2001-04');
+            assert.equal(estimations[0].avgPriceInUsd, 100);
+            assert.equal(estimations[1].avgPriceInUsd, 100.6);
+            assert.equal(estimations[2].avgPriceInUsd, 101.2036);
+            assert.equal(estimations[3].avgPriceInUsd, 101.8108216);
         });
     });
 });

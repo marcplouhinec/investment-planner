@@ -104,6 +104,42 @@ class LocalDate {
     }
 
     /**
+     * @return {YearMonth}
+     */
+    toClosestYearMonth() {
+        let year = this.year;
+        let month = this.day < 15 ? this.month : this.month + 1;
+        if (month === 13) {
+            month = 1;
+            year++;
+        }
+
+        return new YearMonth({
+            year: year,
+            month: month
+        });
+    }
+
+    /**
+     * Useful for sorting an array of {@link LocalDate}s in the ascending order.
+     *
+     * @param {LocalDate} localDate1
+     * @param {LocalDate} localDate2
+     * @return {Number}
+     */
+    static compareAsc(localDate1, localDate2) {
+        const yearDiff = localDate1.year - localDate2.year;
+        if (yearDiff !== 0) {
+            return yearDiff;
+        }
+        const monthDiff = localDate1.month - localDate2.month;
+        if (monthDiff !== 0) {
+            return monthDiff;
+        }
+        return localDate1.day - localDate2.day;
+    }
+
+    /**
      * @param {LocalDate[]} availableLocalDates
      * @param {LocalDate} targetLocalDate
      * @return {LocalDate} from availableLocalDates that is the closest to targetLocalDate.

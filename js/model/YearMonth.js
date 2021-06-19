@@ -74,6 +74,16 @@ class YearMonth {
     }
 
     /**
+     * @return {YearMonth}
+     */
+    nextMonth() {
+        return new YearMonth({
+            year: this.month <= 11 ? this.year : this.year + 1,
+            month: this.month <= 11 ? this.month + 1 : 1
+        });
+    }
+
+    /**
      * @param {YearMonth} yearMonth
      * @return boolean
      */

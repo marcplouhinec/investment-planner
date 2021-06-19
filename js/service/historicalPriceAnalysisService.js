@@ -1,6 +1,7 @@
 import {HistoricalPrice} from '../model/HistoricalPrice.js';
 import {YearMonth} from '../model/YearMonth.js';
 import {LocalDate} from '../model/LocalDate.js';
+import {RegressionResult} from '../model/RegressionResult.js';
 
 const historicalPriceAnalysisService = {
 
@@ -17,7 +18,7 @@ const historicalPriceAnalysisService = {
 
         const startPrice = historicalPrices.filter(it => it.date.equals(startDate))[0].priceInUsd;
         const endPrice = historicalPrices.filter(it => it.date.equals(endDate))[0].priceInUsd;
-        const nbYears = minYearMonth.nbYearsUntil(maxYearMonth);
+        const nbYears = startDate.toClosestYearMonth().nbYearsUntil(endDate.toClosestYearMonth());
         const overallPerformance = (endPrice - startPrice) / startPrice;
         return Math.pow(1 + overallPerformance, 1.0 / nbYears) - 1;
     },
@@ -57,6 +58,59 @@ const historicalPriceAnalysisService = {
      * @param {HistoricalPrice[]} historicalPrices
      * @param {YearMonth} minYearMonth
      * @param {YearMonth} maxYearMonth
+     * @return {RegressionResult}
+     */
+    calculateRegression: function (historicalPrices, minYearMonth, maxYearMonth) {
+        // A linear regression provides the coefficients `B0` and `B1` for a formula `y = B0 + B1 * x`,
+        // however, our target formula is `y = s * (1 + p)^x`, where `s` is the initial price of the
+        // asset, `p` is the monthly performance, `x` is the number of months of investment, and `y` is
+        // the estimated asset price.
+        // The solution is to use the natural logarithm like this: ln(y) = ln(s) + x * ln(1 + p),
+        // thus, we can use a simple linear regression as our formula becomes linear.
+
+        const monthlyHistoricalPrices = HistoricalPrice.findAllEveryMonthBetween(historicalPrices, minYearMonth, maxYearMonth);
+
+        // Build the points on which we compute the linear regression
+        const points = monthlyHistoricalPrices.map((mhp, index) => {
+            return {
+                x: index,
+                y: Math.log(mhp.historicalPrice.priceInUsd)
+            };
+        });
+        const result = this._computeLinearRegression(points);
+
+        // Convert the results back to prices and performances
+        const startPriceInUsd = Math.exp(result.yIntersect);
+        const performance = Math.exp(result.slope) - 1;
+
+        // Build the response
+        const startDate = monthlyHistoricalPrices[0].historicalPrice.date;
+        const endDate = monthlyHistoricalPrices[monthlyHistoricalPrices.length - 1].historicalPrice.date;
+        return new RegressionResult(startDate, endDate, startPriceInUsd, performance);
+    },
+
+    /**
+     * @param {RegressionResult} regressionResult
+     * @param {YearMonth} endYearMonth
+     * @return {{yearMonth: YearMonth, avgPriceInUsd: number}[]}
+     */
+    generateMonthlyEstimations: function (regressionResult,
+                                          endYearMonth) {
+        const startYearMonth = regressionResult.startDate.toYearMonth();
+
+        return YearMonth.generateRangeBetween(startYearMonth, endYearMonth)
+            .map((yearMonth, index) => {
+                return {
+                    yearMonth: yearMonth,
+                    avgPriceInUsd: regressionResult.startPriceInUsd * Math.pow(1 + regressionResult.monthlyPerformance, index)
+                };
+            });
+    },
+
+    /**
+     * @param {HistoricalPrice[]} historicalPrices
+     * @param {YearMonth} minYearMonth
+     * @param {YearMonth} maxYearMonth
      * @return {{startDate: LocalDate, endDate: LocalDate}}
      */
     _findClosestAvailableMinMaxLocalDates: function (historicalPrices, minYearMonth, maxYearMonth) {
@@ -80,7 +134,25 @@ const historicalPriceAnalysisService = {
         const n = array.length - 1; // We use the "sample" standard deviation, so we divide by n - 1
         const mean = array.reduce((a, b) => a + b) / n;
         return Math.sqrt(array.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n);
-    }
+    },
+
+    /**
+     * @param {{x: number, y: number}[]} points
+     * @return {{yIntersect: number, slope: number}}
+     */
+    _computeLinearRegression: function (points) {
+        const averageX = points.map(p => p.x).reduce((a, b) => a + b) / points.length;
+        const averageY = points.map(p => p.y).reduce((a, b) => a + b) / points.length;
+
+        const nominator = points.map(p => (p.x - averageX) * (p.y - averageY)).reduce((a, b) => a + b);
+        const denominator = points.map(p => Math.pow(p.x - averageX, 2)).reduce((a, b) => a + b);
+        const slope = nominator / denominator;
+
+        return {
+            yIntersect: averageY - slope * averageX,
+            slope: slope
+        };
+    },
 };
 
 export {historicalPriceAnalysisService};

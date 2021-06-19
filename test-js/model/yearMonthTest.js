@@ -196,4 +196,12 @@ describe('YearMonth', () => {
             assert.equal(new YearMonth('2021-01').nbYearsUntil(new YearMonth('2021-07')), 0.5);
         });
     });
+
+    describe('#nextMonth()', () => {
+        it('should work with non-null dates', () => {
+            assert.equal(new YearMonth('2021-05').nextMonth().toString(), '2021-06');
+            assert.equal(new YearMonth('2021-11').nextMonth().toString(), '2021-12');
+            assert.equal(new YearMonth('2021-12').nextMonth().toString(), '2022-01');
+        });
+    });
 });
