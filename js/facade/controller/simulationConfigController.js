@@ -1,6 +1,7 @@
 import CodeFlask from '../../../vendors/codeflask-1.4.1/build/codeflask.module.js';
 import {simulationConfigService} from '../../service/simulationConfigService.js'
-import {simulationConfigConverter} from '../converter/simulationConfigConverter.js'
+import {SimulationConfig} from '../../model/SimulationConfig.js';
+import JSON5 from "../../../vendors/json5-2.2.0/dist/index.mjs";
 
 const simulationConfigController = {
 
@@ -27,7 +28,7 @@ const simulationConfigController = {
 
         let simulationConfig;
         try {
-            simulationConfig = simulationConfigConverter.convertCodeToSimulationConfig(code);
+            simulationConfig = SimulationConfig.parseProperties(JSON5.parse(code));
         } catch (error) {
             this._updateMessage(String(error), 'ERROR');
             console.log(error);

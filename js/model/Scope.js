@@ -17,7 +17,7 @@ class Scope {
      * @param {{
      *     startYearMonth: YearMonth,
      *     endYearMonth: YearMonth
-     * }=} properties
+     * }|null} properties
      * @return {Scope}
      */
     static parseProperties(properties) {

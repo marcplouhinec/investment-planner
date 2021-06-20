@@ -20,10 +20,10 @@ class SimulationConfig {
 
     /**
      * @param {{
-     *     scope: Scope,
-     *     portfolioInvestments: PortfolioInvestment[],
-     *     assets: Asset[]
-     * }=} properties
+     *     scope: Scope|null,
+     *     portfolioInvestments: PortfolioInvestment[]|null,
+     *     assets: Asset[]|null
+     * }|{}|null} properties
      * @return {SimulationConfig}
      */
     static parseProperties(properties) {

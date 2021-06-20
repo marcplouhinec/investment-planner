@@ -1,12 +1,12 @@
-import {simulationConfigConverter} from '../../../js/facade/converter/simulationConfigConverter.js'
+import {SimulationConfig} from '../../js/model/SimulationConfig.js'
+import JSON5 from '../../vendors/json5-2.2.0/dist/index.mjs';
 
 const assert = chai.assert;
-const expect = chai.expect;
 
-describe('simulationConfigConverter', () => {
-    describe('#convertCodeToSimulationConfig()', () => {
+describe('simulationConfig', () => {
+    describe('#parseProperties()', () => {
         it('should convert empty config', () => {
-            const simulationConfig = simulationConfigConverter.convertCodeToSimulationConfig('{}');
+            const simulationConfig = SimulationConfig.parseProperties({});
             assert.equal(simulationConfig.scope.startYearMonth.year, 0);
             assert.equal(simulationConfig.scope.startYearMonth.month, 0);
             assert.equal(simulationConfig.scope.endYearMonth.year, 0);
@@ -21,7 +21,7 @@ describe('simulationConfigConverter', () => {
             const response = await fetch('simulation-configs/default.json5');
             const code = await response.text();
 
-            const simulationConfig = simulationConfigConverter.convertCodeToSimulationConfig(code);
+            const simulationConfig = SimulationConfig.parseProperties(JSON5.parse(code));
             assert.equal(simulationConfig.scope.startYearMonth.year, 1970);
             assert.equal(simulationConfig.scope.startYearMonth.month, 1);
             assert.equal(simulationConfig.scope.endYearMonth.year, 2065);
@@ -51,12 +51,6 @@ describe('simulationConfigConverter', () => {
             assert.equal(asset.historicalPricesFormat, "YAHOO_FINANCE_MONTHLY");
             assert.equal(asset.historicalPricesPath,
                 "investment-assets/Vanguard Total Stock Market Index Fund ETF Shares - VTI.yf.csv");
-        });
-
-        it('should fail with invalid config', () => {
-            expect(() => {
-                simulationConfigConverter.convertCodeToSimulationConfig('@#!');
-            }).to.throw("JSON5: invalid character '@' at 1:1");
         });
     });
 });
