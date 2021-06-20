@@ -83,10 +83,19 @@ const historicalPriceAnalysisService = {
         const startPriceInUsd = Math.exp(result.yIntersect);
         const performance = Math.exp(result.slope) - 1;
 
+        // Compute the standard error
+        const observedValues = [];
+        const predictedValues = [];
+        for (let i = 0; i < monthlyHistoricalPrices.length; i++) {
+            observedValues.push(monthlyHistoricalPrices[i].historicalPrice.priceInUsd);
+            predictedValues.push(startPriceInUsd * Math.pow(1 + performance, i));
+        }
+        const standardError = this._computeStandardError(observedValues, predictedValues);
+
         // Build the response
         const startDate = monthlyHistoricalPrices[0].historicalPrice.date;
         const endDate = monthlyHistoricalPrices[monthlyHistoricalPrices.length - 1].historicalPrice.date;
-        return new RegressionResult(startDate, endDate, startPriceInUsd, performance);
+        return new RegressionResult(startDate, endDate, startPriceInUsd, performance, standardError);
     },
 
     /**
@@ -153,6 +162,26 @@ const historicalPriceAnalysisService = {
             slope: slope
         };
     },
+
+    /**
+     * @param {number[]} observedValues
+     * @param {number[]} predictedValues
+     * @return {number}
+     */
+    _computeStandardError: function (observedValues, predictedValues) {
+        if (!observedValues || !predictedValues
+            || observedValues.length === 0 || observedValues.length !== predictedValues.length) {
+            return 0;
+        }
+
+        const nbValues = observedValues.length;
+        let residualsSum = 0;
+        for (let i = 0; i < nbValues; i++) {
+            residualsSum += Math.pow(observedValues[i] - predictedValues[i], 2);
+        }
+
+        return Math.sqrt(residualsSum / (nbValues - 2));
+    }
 };
 
 export {historicalPriceAnalysisService};

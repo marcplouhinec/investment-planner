@@ -121,6 +121,7 @@ describe('historicalPriceAnalysisService', () => {
             assert.equal(result.endDate.toString(), '2021-06-01');
             assert.equal(result.startPriceInUsd, 40.41634212096807);
             assert.equal(result.monthlyPerformance, 0.005678686934672772);
+            assert.equal(result.standardError, 14.426626257267296);
         });
     });
 

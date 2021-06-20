@@ -16,8 +16,13 @@ class RegressionResult {
      * @param {LocalDate} endDate
      * @param {number} startPriceInUsd
      * @param {number} monthlyPerformance
+     * @param {number} standardError a.k.a. Root-mean-square deviation
      */
-    constructor(startDate, endDate, startPriceInUsd, monthlyPerformance) {
+    constructor(startDate,
+                endDate,
+                startPriceInUsd,
+                monthlyPerformance,
+                standardError) {
         /** @type {LocalDate} */
         this.startDate = startDate;
         /** @type {LocalDate} */
@@ -26,6 +31,8 @@ class RegressionResult {
         this.startPriceInUsd = startPriceInUsd;
         /** @type {number} */
         this.monthlyPerformance = monthlyPerformance;
+        /** @type {number} */
+        this.standardError = standardError;
     }
 }
 
