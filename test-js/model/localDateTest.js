@@ -6,14 +6,14 @@ const expect = chai.expect;
 describe('LocalDate', () => {
     describe('#constructor()', () => {
         it('should parse string', () => {
-            const localDate = new LocalDate('2021-06-12');
+            const localDate = LocalDate.parseString('2021-06-12');
             assert.equal(localDate.year, 2021);
             assert.equal(localDate.month, 6);
             assert.equal(localDate.day, 12);
         });
 
         it('should parse object', () => {
-            const localDate = new LocalDate({
+            const localDate = LocalDate.parseProperties({
                 year: 2020,
                 month: 5,
                 day: 25
@@ -24,14 +24,14 @@ describe('LocalDate', () => {
         });
 
         it('should parse null', () => {
-            const localDate = new LocalDate(null);
+            const localDate = LocalDate.parseProperties(null);
             assert.equal(localDate.year, 0);
             assert.equal(localDate.month, 0);
             assert.equal(localDate.day, 0);
         });
 
         it('should parse blank string', () => {
-            const localDate = new LocalDate(' \t \n ');
+            const localDate = LocalDate.parseString(' \t \n ');
             assert.equal(localDate.year, 0);
             assert.equal(localDate.month, 0);
             assert.equal(localDate.day, 0);
@@ -39,76 +39,76 @@ describe('LocalDate', () => {
 
         it('should fail on invalid string', () => {
             expect(() => {
-                new LocalDate('202-01-A')
+                LocalDate.parseString('202-01-A')
             }).to.throw("The value '202-01-A' is not a valid LocalDate. The correct syntax is 'YYYY-MM-DD'.");
         });
     });
 
     describe('#isBefore()', () => {
         it('should work with non-null dates', () => {
-            assert.equal(new LocalDate('2021-02-01').isBefore(new LocalDate('2021-05-01')), true);
-            assert.equal(new LocalDate('2020-12-01').isBefore(new LocalDate('2021-05-01')), true);
-            assert.equal(new LocalDate('2020-12-01').isBefore(new LocalDate('2020-12-06')), true);
-            assert.equal(new LocalDate('2020-12-01').isBefore(new LocalDate('2020-10-01')), false);
-            assert.equal(new LocalDate('2021-10-01').isBefore(new LocalDate('2020-10-01')), false);
-            assert.equal(new LocalDate('2021-10-25').isBefore(new LocalDate('2021-10-01')), false);
+            assert.equal(LocalDate.parseString('2021-02-01').isBefore(LocalDate.parseString('2021-05-01')), true);
+            assert.equal(LocalDate.parseString('2020-12-01').isBefore(LocalDate.parseString('2021-05-01')), true);
+            assert.equal(LocalDate.parseString('2020-12-01').isBefore(LocalDate.parseString('2020-12-06')), true);
+            assert.equal(LocalDate.parseString('2020-12-01').isBefore(LocalDate.parseString('2020-10-01')), false);
+            assert.equal(LocalDate.parseString('2021-10-01').isBefore(LocalDate.parseString('2020-10-01')), false);
+            assert.equal(LocalDate.parseString('2021-10-25').isBefore(LocalDate.parseString('2021-10-01')), false);
         });
     });
 
     describe('#isAfter()', () => {
         it('should work with non-null dates', () => {
-            assert.equal(new LocalDate('2021-02-01').isAfter(new LocalDate('2021-05-01')), false);
-            assert.equal(new LocalDate('2020-12-01').isAfter(new LocalDate('2021-05-01')), false);
-            assert.equal(new LocalDate('2020-12-01').isAfter(new LocalDate('2020-12-06')), false);
-            assert.equal(new LocalDate('2020-12-01').isAfter(new LocalDate('2020-10-01')), true);
-            assert.equal(new LocalDate('2021-10-01').isAfter(new LocalDate('2020-10-01')), true);
-            assert.equal(new LocalDate('2021-10-25').isAfter(new LocalDate('2021-10-01')), true);
+            assert.equal(LocalDate.parseString('2021-02-01').isAfter(LocalDate.parseString('2021-05-01')), false);
+            assert.equal(LocalDate.parseString('2020-12-01').isAfter(LocalDate.parseString('2021-05-01')), false);
+            assert.equal(LocalDate.parseString('2020-12-01').isAfter(LocalDate.parseString('2020-12-06')), false);
+            assert.equal(LocalDate.parseString('2020-12-01').isAfter(LocalDate.parseString('2020-10-01')), true);
+            assert.equal(LocalDate.parseString('2021-10-01').isAfter(LocalDate.parseString('2020-10-01')), true);
+            assert.equal(LocalDate.parseString('2021-10-25').isAfter(LocalDate.parseString('2021-10-01')), true);
         });
     });
 
     describe('#equals()', () => {
         it('should work with non-null dates', () => {
-            assert.equal(new LocalDate('2021-02-01').equals(new LocalDate('2021-02-01')), true);
-            assert.equal(new LocalDate('2021-02-01').equals(new LocalDate('2021-02-25')), false);
-            assert.equal(new LocalDate('2021-02-01').equals(new LocalDate('2021-07-01')), false);
-            assert.equal(new LocalDate('2021-02-01').equals(new LocalDate('2019-02-01')), false);
+            assert.equal(LocalDate.parseString('2021-02-01').equals(LocalDate.parseString('2021-02-01')), true);
+            assert.equal(LocalDate.parseString('2021-02-01').equals(LocalDate.parseString('2021-02-25')), false);
+            assert.equal(LocalDate.parseString('2021-02-01').equals(LocalDate.parseString('2021-07-01')), false);
+            assert.equal(LocalDate.parseString('2021-02-01').equals(LocalDate.parseString('2019-02-01')), false);
         });
     });
 
     describe('#toString()', () => {
         it('should work with non-null dates', () => {
-            assert.equal(new LocalDate('2021-02-01').toString(), '2021-02-01');
-            assert.equal(new LocalDate('2021-09-15').toString(), '2021-09-15');
-            assert.equal(new LocalDate('2020-10-30').toString(), '2020-10-30');
-            assert.equal(new LocalDate('2020-12-31').toString(), '2020-12-31');
+            assert.equal(LocalDate.parseString('2021-02-01').toString(), '2021-02-01');
+            assert.equal(LocalDate.parseString('2021-09-15').toString(), '2021-09-15');
+            assert.equal(LocalDate.parseString('2020-10-30').toString(), '2020-10-30');
+            assert.equal(LocalDate.parseString('2020-12-31').toString(), '2020-12-31');
         });
     });
 
     describe('#nbDaysUntil()', () => {
         it('should work with non-null dates', () => {
             assert.equal(
-                new LocalDate('2021-02-01').nbDaysUntil(new LocalDate('2021-02-01')),
+                LocalDate.parseString('2021-02-01').nbDaysUntil(LocalDate.parseString('2021-02-01')),
                 0);
             assert.equal(
-                new LocalDate('2021-02-01').nbDaysUntil(new LocalDate('2021-02-02')),
+                LocalDate.parseString('2021-02-01').nbDaysUntil(LocalDate.parseString('2021-02-02')),
                 1);
             assert.equal(
-                new LocalDate('2021-02-02').nbDaysUntil(new LocalDate('2021-02-01')),
+                LocalDate.parseString('2021-02-02').nbDaysUntil(LocalDate.parseString('2021-02-01')),
                 -1);
             assert.equal(
-                new LocalDate('2021-02-01').nbDaysUntil(new LocalDate('2021-02-21')),
+                LocalDate.parseString('2021-02-01').nbDaysUntil(LocalDate.parseString('2021-02-21')),
                 20);
             assert.equal(
-                new LocalDate('2021-02-01').nbDaysUntil(new LocalDate('2021-03-01')),
+                LocalDate.parseString('2021-02-01').nbDaysUntil(LocalDate.parseString('2021-03-01')),
                 28);
             assert.equal(
-                new LocalDate('2021-01-01').nbDaysUntil(new LocalDate('2021-03-20')),
+                LocalDate.parseString('2021-01-01').nbDaysUntil(LocalDate.parseString('2021-03-20')),
                 31 + 28 + 19);
             assert.equal(
-                new LocalDate('2020-01-01').nbDaysUntil(new LocalDate('2021-01-01')),
+                LocalDate.parseString('2020-01-01').nbDaysUntil(LocalDate.parseString('2021-01-01')),
                 366);
             assert.equal(
-                new LocalDate('2019-01-01').nbDaysUntil(new LocalDate('2021-02-10')),
+                LocalDate.parseString('2019-01-01').nbDaysUntil(LocalDate.parseString('2021-02-10')),
                 365 * 2 + 31 + 10);
         });
     });
@@ -116,16 +116,16 @@ describe('LocalDate', () => {
     describe('#nbYearsUntil()', () => {
         it('should work with non-null dates', () => {
             assert.equal(
-                new LocalDate('2021-02-01').nbYearsUntil(new LocalDate('2021-02-01')),
+                LocalDate.parseString('2021-02-01').nbYearsUntil(LocalDate.parseString('2021-02-01')),
                 0);
             assert.equal(
-                new LocalDate('2021-02-01').nbYearsUntil(new LocalDate('2022-02-01')),
+                LocalDate.parseString('2021-02-01').nbYearsUntil(LocalDate.parseString('2022-02-01')),
                 1);
             assert.equal(
-                new LocalDate('2020-01-01').nbYearsUntil(new LocalDate('2019-01-01')),
+                LocalDate.parseString('2020-01-01').nbYearsUntil(LocalDate.parseString('2019-01-01')),
                 -1);
             assert.equal(
-                new LocalDate('2021-02-01').nbYearsUntil(new LocalDate('2023-02-01')),
+                LocalDate.parseString('2021-02-01').nbYearsUntil(LocalDate.parseString('2023-02-01')),
                 2);
         });
     });
@@ -133,70 +133,70 @@ describe('LocalDate', () => {
     describe('#findClosestAvailableLocalDate()', () => {
         it('should work with non-null dates', () => {
             const availableLocalDates = [
-                new LocalDate('2021-01-31'),
-                new LocalDate('2021-02-28'),
-                new LocalDate('2021-03-31'),
-                new LocalDate('2021-04-30'),
-                new LocalDate('2021-05-15'),
-                new LocalDate('2021-05-16'),
-                new LocalDate('2021-05-18'),
+                LocalDate.parseString('2021-01-31'),
+                LocalDate.parseString('2021-02-28'),
+                LocalDate.parseString('2021-03-31'),
+                LocalDate.parseString('2021-04-30'),
+                LocalDate.parseString('2021-05-15'),
+                LocalDate.parseString('2021-05-16'),
+                LocalDate.parseString('2021-05-18'),
             ];
             assert.equal(
                 LocalDate.findClosestAvailableLocalDate(
-                    availableLocalDates, new LocalDate('2021-02-28')).toString(),
+                    availableLocalDates, LocalDate.parseString('2021-02-28')).toString(),
                 '2021-02-28');
             assert.equal(
                 LocalDate.findClosestAvailableLocalDate(
-                    availableLocalDates, new LocalDate('2021-02-20')).toString(),
+                    availableLocalDates, LocalDate.parseString('2021-02-20')).toString(),
                 '2021-02-28');
             assert.equal(
                 LocalDate.findClosestAvailableLocalDate(
-                    availableLocalDates, new LocalDate('2021-03-01')).toString(),
+                    availableLocalDates, LocalDate.parseString('2021-03-01')).toString(),
                 '2021-02-28');
             assert.equal(
                 LocalDate.findClosestAvailableLocalDate(
-                    availableLocalDates, new LocalDate('1999-01-01')).toString(),
+                    availableLocalDates, LocalDate.parseString('1999-01-01')).toString(),
                 '2021-01-31');
             assert.equal(
                 LocalDate.findClosestAvailableLocalDate(
-                    availableLocalDates, new LocalDate('2021-06-13')).toString(),
+                    availableLocalDates, LocalDate.parseString('2021-06-13')).toString(),
                 '2021-05-18');
             assert.equal(
                 LocalDate.findClosestAvailableLocalDate(
-                    availableLocalDates, new LocalDate('2021-05-17')).toString(),
+                    availableLocalDates, LocalDate.parseString('2021-05-17')).toString(),
                 '2021-05-16');
             assert.equal(
                 LocalDate.findClosestAvailableLocalDate(
-                    availableLocalDates, new LocalDate('2021-05-05')).toString(),
+                    availableLocalDates, LocalDate.parseString('2021-05-05')).toString(),
                 '2021-04-30');
             assert.equal(
                 LocalDate.findClosestAvailableLocalDate(
-                    availableLocalDates, new LocalDate('2021-05-15')).toString(),
+                    availableLocalDates, LocalDate.parseString('2021-05-15')).toString(),
                 '2021-05-15');
         });
     });
 
     describe('#toClosestYearMonth()', () => {
         it('should work with non-null dates', () => {
-            assert.equal(new LocalDate('2021-02-01').toClosestYearMonth().toString(), '2021-02');
-            assert.equal(new LocalDate('2021-02-10').toClosestYearMonth().toString(), '2021-02');
-            assert.equal(new LocalDate('2021-02-14').toClosestYearMonth().toString(), '2021-02');
-            assert.equal(new LocalDate('2021-02-15').toClosestYearMonth().toString(), '2021-03');
-            assert.equal(new LocalDate('2021-02-16').toClosestYearMonth().toString(), '2021-03');
-            assert.equal(new LocalDate('2021-02-28').toClosestYearMonth().toString(), '2021-03');
-            assert.equal(new LocalDate('2021-12-05').toClosestYearMonth().toString(), '2021-12');
-            assert.equal(new LocalDate('2021-12-30').toClosestYearMonth().toString(), '2022-01');
+            assert.equal(LocalDate.parseString('2021-02-01').toClosestYearMonth().toString(), '2021-02');
+            assert.equal(LocalDate.parseString('2021-02-10').toClosestYearMonth().toString(), '2021-02');
+            assert.equal(LocalDate.parseString('2021-02-14').toClosestYearMonth().toString(), '2021-02');
+            assert.equal(LocalDate.parseString('2021-02-15').toClosestYearMonth().toString(), '2021-03');
+            assert.equal(LocalDate.parseString('2021-02-16').toClosestYearMonth().toString(), '2021-03');
+            assert.equal(LocalDate.parseString('2021-02-28').toClosestYearMonth().toString(), '2021-03');
+            assert.equal(LocalDate.parseString('2021-12-05').toClosestYearMonth().toString(), '2021-12');
+            assert.equal(LocalDate.parseString('2021-12-30').toClosestYearMonth().toString(), '2022-01');
         });
     });
 
     describe('#compareAsc()', () => {
         it('should work with multiple dates', () => {
             const dates = [
-                new LocalDate('2021-05-14'),
-                new LocalDate('2021-05-12'),
-                new LocalDate('2021-04-28'),
-                new LocalDate('2021-06-28'),
-                new LocalDate('2020-10-01'),
+                LocalDate.parseString('2021-05-14'),
+                LocalDate.parseString('2021-05-12'),
+                LocalDate.parseString('2021-04-28'),
+                LocalDate.parseString('2021-06-28'),
+                LocalDate.parseString('2020-10-01'),
             ];
 
             const sortedDates = dates.sort(LocalDate.compareAsc);

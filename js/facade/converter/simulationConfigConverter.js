@@ -9,8 +9,7 @@ const simulationConfigConverter = {
      * @throws Conversion error
      */
     convertCodeToSimulationConfig: function (code) {
-        const parsedCode = JSON5.parse(code);
-        return new SimulationConfig(parsedCode);
+        return SimulationConfig.parseProperties(JSON5.parse(code));
     }
 
 };

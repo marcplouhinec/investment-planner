@@ -7,7 +7,7 @@ const expect = chai.expect;
 describe('historicalPriceReadingService', () => {
     describe('#readHistoricalPrices()', () => {
         it('should convert Yahoo Finance Monthly format', async function () {
-            const asset = new Asset({
+            const asset = Asset.parseProperties({
                 code: "TOTAL_STOCK_MARKET",
                 historicalPricesFormat: "YAHOO_FINANCE_MONTHLY",
                 historicalPricesPath: "investment-assets/Vanguard Total Stock Market Index Fund ETF Shares - VTI.yf.csv"
@@ -22,7 +22,7 @@ describe('historicalPriceReadingService', () => {
         });
 
         it('should convert MSCI Monthly format', async function () {
-            const asset = new Asset({
+            const asset = Asset.parseProperties({
                 code: "MSCI_ACWI_EX_USA",
                 historicalPricesFormat: "MSCI_MONTHLY",
                 historicalPricesPath: "investment-assets/MSCI ACWI ex USA Standard (Large+Mid Cap).msci.xls"
@@ -37,7 +37,7 @@ describe('historicalPriceReadingService', () => {
         });
 
         it('should fail with unknown format', async function () {
-            const asset = new Asset({
+            const asset = Asset.parseProperties({
                 code: "TOTAL_STOCK_MARKET",
                 historicalPricesFormat: "UNKNOWN_FORMAT",
                 historicalPricesPath: "test.csv"

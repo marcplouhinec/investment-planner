@@ -3,19 +3,14 @@ import {YearMonth} from './YearMonth.js';
 
 class HistoricalPrice {
     /**
-     * @param {{
-     *     date: LocalDate|string,
-     *     priceInUsd: number,
-     * }=} properties
+     * @param {LocalDate} date
+     * @param {number} priceInUsd
      */
-    constructor(properties) {
-        const sanitizedProperties = properties || {};
-
+    constructor(date, priceInUsd) {
         /** @type {LocalDate} */
-        this.date = new LocalDate(sanitizedProperties.date);
-
+        this.date = date;
         /** @type {number} */
-        this.priceInUsd = sanitizedProperties.priceInUsd || 0;
+        this.priceInUsd = priceInUsd;
     }
 
     /**

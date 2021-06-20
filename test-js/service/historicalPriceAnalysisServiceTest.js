@@ -12,7 +12,7 @@ describe('historicalPriceAnalysisService', () => {
     describe('#calculateAnnualizedPerformance()', () => {
         it('should calculate MSCI USA', async function () {
             // Load MSCI USA historical prices
-            const asset = new Asset({
+            const asset = Asset.parseProperties({
                 code: "MSCI_USA_STANDARD",
                 historicalPricesFormat: "MSCI_MONTHLY",
                 historicalPricesPath: "investment-assets/MSCI USA Standard (Large+Mid Cap).msci.xls"
@@ -21,28 +21,28 @@ describe('historicalPriceAnalysisService', () => {
 
             // Calculate the annualized performance for 2020
             let performance = historicalPriceAnalysisService.calculateAnnualizedPerformance(
-                prices, new YearMonth('2020-01'), new YearMonth('2021-01'));
+                prices, YearMonth.parseString('2020-01'), YearMonth.parseString('2021-01'));
             assert.equal(performance, 0.19224284565945138);
 
             // Calculate the annualized performance for 2019
             performance = historicalPriceAnalysisService.calculateAnnualizedPerformance(
-                prices, new YearMonth('2019-01'), new YearMonth('2020-01'));
+                prices, YearMonth.parseString('2019-01'), YearMonth.parseString('2020-01'));
             assert.equal(performance, 0.29071612450661855);
 
             // Calculate the annualized performance between 2019 and 2020 (2 years)
             performance = historicalPriceAnalysisService.calculateAnnualizedPerformance(
-                prices, new YearMonth('2019-01'), new YearMonth('2021-01'));
+                prices, YearMonth.parseString('2019-01'), YearMonth.parseString('2021-01'));
             assert.equal(performance, 0.2405027469620169);
 
             // Calculate the annualized performance for 2 years until 2020-05-01
             performance = historicalPriceAnalysisService.calculateAnnualizedPerformance(
-                prices, new YearMonth('2019-05'), new YearMonth('2021-05'));
+                prices, YearMonth.parseString('2019-05'), YearMonth.parseString('2021-05'));
             assert.equal(performance, 0.2029080283736311);
         });
 
         it('should calculate MSCI USA gross', async function () {
             // Load MSCI USA gross historical prices
-            const asset = new Asset({
+            const asset = Asset.parseProperties({
                 code: "MSCI_USA_STANDARD_GROSS",
                 historicalPricesFormat: "MSCI_MONTHLY",
                 historicalPricesPath: "investment-assets/MSCI USA Standard (Large+Mid Cap) - gross.msci.xls"
@@ -51,27 +51,27 @@ describe('historicalPriceAnalysisService', () => {
 
             // Calculate the annualized performance for 1 year since the 1st May
             let performance = historicalPriceAnalysisService.calculateAnnualizedPerformance(
-                prices, new YearMonth('2020-05'), new YearMonth('2021-05')).toFixed(4);
+                prices, YearMonth.parseString('2020-05'), YearMonth.parseString('2021-05')).toFixed(4);
             assert.equal(performance, 0.4847);
 
             // Calculate the annualized performance for 3 years since the 1st May
             performance = historicalPriceAnalysisService.calculateAnnualizedPerformance(
-                prices, new YearMonth('2018-05'), new YearMonth('2021-05')).toFixed(4);
+                prices, YearMonth.parseString('2018-05'), YearMonth.parseString('2021-05')).toFixed(4);
             assert.equal(performance, 0.1937);
 
             // Calculate the annualized performance for 5 years since the 1st May
             performance = historicalPriceAnalysisService.calculateAnnualizedPerformance(
-                prices, new YearMonth('2016-05'), new YearMonth('2021-05')).toFixed(4);
+                prices, YearMonth.parseString('2016-05'), YearMonth.parseString('2021-05')).toFixed(4);
             assert.equal(performance, 0.1788);
 
             // Calculate the annualized performance for 10 years since the 1st May
             performance = historicalPriceAnalysisService.calculateAnnualizedPerformance(
-                prices, new YearMonth('2011-05'), new YearMonth('2021-05')).toFixed(4);
+                prices, YearMonth.parseString('2011-05'), YearMonth.parseString('2021-05')).toFixed(4);
             assert.equal(performance, 0.1433);
 
             // Calculate the annualized performance from inception to the 1st May 2021
             performance = historicalPriceAnalysisService.calculateAnnualizedPerformance(
-                prices, new YearMonth('1988-01'), new YearMonth('2021-05')).toFixed(4);
+                prices, YearMonth.parseString('1988-01'), YearMonth.parseString('2021-05')).toFixed(4);
             assert.equal(performance, 0.1141);
         });
     });
@@ -79,7 +79,7 @@ describe('historicalPriceAnalysisService', () => {
     describe('#calculateAnnualizedPerformanceStandardDeviation()', () => {
         it('should calculate MSCI USA gross', async function () {
             // Load MSCI USA gross historical prices
-            const asset = new Asset({
+            const asset = Asset.parseProperties({
                 code: "MSCI_USA_STANDARD_GROSS",
                 historicalPricesFormat: "MSCI_MONTHLY",
                 historicalPricesPath: "investment-assets/MSCI USA Standard (Large+Mid Cap) - gross.msci.xls"
@@ -88,17 +88,17 @@ describe('historicalPriceAnalysisService', () => {
 
             // Calculate the annualized performance for 3 years since the 1st May
             let performance = historicalPriceAnalysisService.calculateAnnualizedPerformanceStandardDeviation(
-                prices, new YearMonth('2018-05'), new YearMonth('2021-05')).toFixed(4);
+                prices, YearMonth.parseString('2018-05'), YearMonth.parseString('2021-05')).toFixed(4);
             assert.equal(performance, 0.1887);
 
             // Calculate the annualized performance for 5 years since the 1st May
             performance = historicalPriceAnalysisService.calculateAnnualizedPerformanceStandardDeviation(
-                prices, new YearMonth('2016-05'), new YearMonth('2021-05')).toFixed(4);
+                prices, YearMonth.parseString('2016-05'), YearMonth.parseString('2021-05')).toFixed(4);
             assert.equal(performance, 0.1524);
 
             // Calculate the annualized performance for 10 years since the 1st May
             performance = historicalPriceAnalysisService.calculateAnnualizedPerformanceStandardDeviation(
-                prices, new YearMonth('2011-05'), new YearMonth('2021-05')).toFixed(4);
+                prices, YearMonth.parseString('2011-05'), YearMonth.parseString('2021-05')).toFixed(4);
             assert.equal(performance, 0.1382);
         });
     });
@@ -106,7 +106,7 @@ describe('historicalPriceAnalysisService', () => {
     describe('#calculateRegression()', () => {
         it('should calculate regression with TOTAL_STOCK_MARKET', async function () {
             // Load the historical prices
-            const asset = new Asset({
+            const asset = Asset.parseProperties({
                 code: "TOTAL_STOCK_MARKET",
                 historicalPricesFormat: "YAHOO_FINANCE_MONTHLY",
                 historicalPricesPath: "investment-assets/Vanguard Total Stock Market Index Fund ETF Shares - VTI.yf.csv"
@@ -115,7 +115,7 @@ describe('historicalPriceAnalysisService', () => {
 
             // Calculate the regression
             const result = historicalPriceAnalysisService.calculateRegression(
-                prices, new YearMonth('1970-01'), new YearMonth('2022-01'));
+                prices, YearMonth.parseString('1970-01'), YearMonth.parseString('2022-01'));
 
             assert.equal(result.startDate.toString(), '2001-07-01');
             assert.equal(result.endDate.toString(), '2021-06-01');
@@ -128,13 +128,13 @@ describe('historicalPriceAnalysisService', () => {
     describe('#generateMonthlyPredictions()', () => {
         it('should generate for few months', () => {
             const result = new RegressionResult(
-                new LocalDate('2001-01-01'),
-                new LocalDate('2010-01-01'),
+                LocalDate.parseString('2001-01-01'),
+                LocalDate.parseString('2010-01-01'),
                 100,
                 0.006,
                 10);
             const estimations = historicalPriceAnalysisService.generateMonthlyPredictions(
-                result, new YearMonth('2001-04'));
+                result, YearMonth.parseString('2001-04'));
 
             assert.equal(estimations.length, 4);
             assert.equal(estimations[0].yearMonth.toString(), '2001-01');

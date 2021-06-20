@@ -4,24 +4,17 @@ import {YearMonth} from "./YearMonth.js";
 class LocalDate {
 
     /**
-     * @param {{
-     *     year: number,
-     *     month: number,
-     *     day: number
-     * }|string|null} properties
-     * @throws Error if the value is not parsable.
+     * @param {number} year
+     * @param {number} month
+     * @param {number} day
      */
-    constructor(properties) {
-        const sanitizedProperties = LocalDate._parseProperties(properties);
-
+    constructor(year, month, day) {
         /** @type {number} */
-        this.year = sanitizedProperties.year;
-
+        this.year = year;
         /** @type {number} */
-        this.month = sanitizedProperties.month;
-
+        this.month = month;
         /** @type {number} */
-        this.day = sanitizedProperties.day;
+        this.day = day;
     }
 
     /**
@@ -97,10 +90,7 @@ class LocalDate {
      * @return {YearMonth}
      */
     toYearMonth() {
-        return new YearMonth({
-            year: this.year,
-            month: this.month
-        });
+        return new YearMonth(this.year, this.month);
     }
 
     /**
@@ -114,10 +104,7 @@ class LocalDate {
             year++;
         }
 
-        return new YearMonth({
-            year: year,
-            month: month
-        });
+        return new YearMonth(year, month);
     }
 
     /**
@@ -162,20 +149,11 @@ class LocalDate {
 
     /**
      * @param {string} value
-     * @return {{
-     *     year: number,
-     *     month: number,
-     *     day: number
-     * }}
-     * @throws Error if the value is not parsable.
+     * @return {LocalDate}
      */
-    static _parseString(value) {
+    static parseString(value) {
         if (value.trim().length === 0) {
-            return {
-                year: 0,
-                month: 0,
-                day: 0
-            };
+            return new LocalDate(0, 0, 0);
         }
 
         const matched = value.match(/^(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})$/);
@@ -183,11 +161,11 @@ class LocalDate {
             throw new Error(`The value '${value}' is not a valid LocalDate. The correct syntax is 'YYYY-MM-DD'.`);
         }
 
-        return {
-            year: Number(matched.groups['year']),
-            month: Number(matched.groups['month']),
-            day: Number(matched.groups['day'])
-        };
+        const year = Number(matched.groups['year']);
+        const month = Number(matched.groups['month']);
+        const day = Number(matched.groups['day']);
+
+        return new LocalDate(year, month, day);
     }
 
     /**
@@ -195,25 +173,34 @@ class LocalDate {
      *     year: number,
      *     month: number,
      *     day: number
-     * }|string|null} properties
-     * @return {{
+     * }|null} properties
+     * @return {LocalDate}
+     */
+    static parseProperties(properties) {
+        const sanitizedProperties = properties || {};
+
+        const year = !sanitizedProperties ? 0 : sanitizedProperties.year || 0;
+        const month = !sanitizedProperties ? 0 : sanitizedProperties.month || 0;
+        const day = !sanitizedProperties ? 0 : sanitizedProperties.day || 0;
+
+        return new LocalDate(year, month, day);
+    }
+
+    /**
+     * @param {{
      *     year: number,
      *     month: number,
      *     day: number
-     * }}
-     * @throws Error if the value is not parsable.
+     * }|string|null} stringOrProperties
+     * @return {LocalDate}
      */
-    static _parseProperties(properties) {
-        if (typeof properties === 'string') {
-            return LocalDate._parseString(properties);
+    static parseStringOrProperties(stringOrProperties) {
+        if (typeof stringOrProperties === 'string') {
+            return LocalDate.parseString(stringOrProperties);
+        } else {
+            return LocalDate.parseProperties(stringOrProperties);
         }
-        return {
-            year: !properties ? 0 : properties.year || 0,
-            month: !properties ? 0 : properties.month || 0,
-            day: !properties ? 0 : properties.day || 0
-        };
     }
-
 }
 
 export {LocalDate};

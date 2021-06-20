@@ -3,42 +3,42 @@ import {YearMonth} from './YearMonth.js';
 class PortfolioInvestment {
 
     /**
-     * @param {{
-     *     assetCode: string|undefined,
-     *     phase1StartYearMonth: YearMonth|string|undefined,
-     *     phase1InitialWeight: number|undefined,
-     *     phase1FinalWeight: number|undefined,
-     *     phase2StartYearMonth: YearMonth|string|undefined,
-     *     phase2FinalWeight: number|undefined,
-     *     phase3StartYearMonth: YearMonth|string|undefined,
-     *     phase3FinalWeight: number|undefined,
-     *     phase3EndYearMonth: YearMonth|string|undefined,
-     *     enabled: boolean|undefined
-     * }=} properties
+     * @param {string} assetCode
+     * @param {YearMonth} phase1StartYearMonth
+     * @param {number} phase1InitialWeight
+     * @param {number} phase1FinalWeight
+     * @param {YearMonth} phase2StartYearMonth
+     * @param {number} phase2FinalWeight
+     * @param {YearMonth} phase3StartYearMonth
+     * @param {number} phase3FinalWeight
+     * @param {YearMonth} phase3EndYearMonth
+     * @param {boolean} enabled
      */
-    constructor(properties) {
-        const sanitizedProperties = properties || {};
-
+    constructor(assetCode,
+                phase1StartYearMonth, phase1InitialWeight, phase1FinalWeight,
+                phase2StartYearMonth, phase2FinalWeight,
+                phase3StartYearMonth, phase3FinalWeight, phase3EndYearMonth,
+                enabled) {
         /** @type {string} */
-        this.assetCode = sanitizedProperties.assetCode || '';
+        this.assetCode = assetCode;
         /** @type {YearMonth} */
-        this.phase1StartYearMonth = new YearMonth(sanitizedProperties.phase1StartYearMonth);
+        this.phase1StartYearMonth = phase1StartYearMonth;
         /** @type {number} */
-        this.phase1InitialWeight = sanitizedProperties.phase1InitialWeight || 0;
+        this.phase1InitialWeight = phase1InitialWeight;
         /** @type {number} */
-        this.phase1FinalWeight = sanitizedProperties.phase1FinalWeight || 0;
+        this.phase1FinalWeight = phase1FinalWeight;
         /** @type {YearMonth} */
-        this.phase2StartYearMonth = new YearMonth(sanitizedProperties.phase2StartYearMonth);
+        this.phase2StartYearMonth = phase2StartYearMonth;
         /** @type {number} */
-        this.phase2FinalWeight = sanitizedProperties.phase2FinalWeight || 0;
+        this.phase2FinalWeight = phase2FinalWeight;
         /** @type {YearMonth} */
-        this.phase3StartYearMonth = new YearMonth(sanitizedProperties.phase3StartYearMonth);
+        this.phase3StartYearMonth = phase3StartYearMonth;
         /** @type {number} */
-        this.phase3FinalWeight = sanitizedProperties.phase3FinalWeight || 0;
+        this.phase3FinalWeight = phase3FinalWeight;
         /** @type {YearMonth} */
-        this.phase3EndYearMonth = new YearMonth(sanitizedProperties.phase3EndYearMonth);
+        this.phase3EndYearMonth = phase3EndYearMonth;
         /** @type {boolean} */
-        this.enabled = typeof sanitizedProperties.enabled === 'boolean' ? sanitizedProperties.enabled : true;
+        this.enabled = enabled;
     }
 
     /**
@@ -52,10 +52,10 @@ class PortfolioInvestment {
         }
 
         // Find the weight range
-        let startWeight = 0;
-        let endWeight = 0;
-        let startYearMonth = this.phase1StartYearMonth;
-        let endYearMonth = this.phase3EndYearMonth;
+        let startWeight;
+        let endWeight;
+        let startYearMonth;
+        let endYearMonth;
 
         if (yearMonth.equals(this.phase1StartYearMonth)
             || (yearMonth.isAfter(this.phase1StartYearMonth) && yearMonth.isBefore(this.phase2StartYearMonth))) {
@@ -114,6 +114,53 @@ class PortfolioInvestment {
             return null;
         }
         return yearMonths[0];
+    }
+
+    /**
+     * @param {{
+     *     assetCode: string|undefined,
+     *     phase1StartYearMonth: YearMonth|string|undefined,
+     *     phase1InitialWeight: number|undefined,
+     *     phase1FinalWeight: number|undefined,
+     *     phase2StartYearMonth: YearMonth|string|undefined,
+     *     phase2FinalWeight: number|undefined,
+     *     phase3StartYearMonth: YearMonth|string|undefined,
+     *     phase3FinalWeight: number|undefined,
+     *     phase3EndYearMonth: YearMonth|string|undefined,
+     *     enabled: boolean|undefined
+     * }=} properties
+     * @return {PortfolioInvestment}
+     */
+    static parseProperties(properties) {
+        const sanitizedProperties = properties || {};
+
+        /** @type {string} */
+        const assetCode = sanitizedProperties.assetCode || '';
+        /** @type {YearMonth} */
+        const phase1StartYearMonth = YearMonth.parseStringOrProperties(sanitizedProperties.phase1StartYearMonth);
+        /** @type {number} */
+        const phase1InitialWeight = sanitizedProperties.phase1InitialWeight || 0;
+        /** @type {number} */
+        const phase1FinalWeight = sanitizedProperties.phase1FinalWeight || 0;
+        /** @type {YearMonth} */
+        const phase2StartYearMonth = YearMonth.parseStringOrProperties(sanitizedProperties.phase2StartYearMonth);
+        /** @type {number} */
+        const phase2FinalWeight = sanitizedProperties.phase2FinalWeight || 0;
+        /** @type {YearMonth} */
+        const phase3StartYearMonth = YearMonth.parseStringOrProperties(sanitizedProperties.phase3StartYearMonth);
+        /** @type {number} */
+        const phase3FinalWeight = sanitizedProperties.phase3FinalWeight || 0;
+        /** @type {YearMonth} */
+        const phase3EndYearMonth = YearMonth.parseStringOrProperties(sanitizedProperties.phase3EndYearMonth);
+        /** @type {boolean} */
+        const enabled = typeof sanitizedProperties.enabled === 'boolean' ? sanitizedProperties.enabled : true;
+
+        return new PortfolioInvestment(
+            assetCode,
+            phase1StartYearMonth, phase1InitialWeight, phase1FinalWeight,
+            phase2StartYearMonth, phase2FinalWeight,
+            phase3StartYearMonth, phase3FinalWeight, phase3EndYearMonth,
+            enabled);
     }
 }
 

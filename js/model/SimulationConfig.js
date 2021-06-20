@@ -5,23 +5,39 @@ import {Asset} from "./Asset.js";
 class SimulationConfig {
 
     /**
+     * @param {Scope} scope
+     * @param {PortfolioInvestment[]} portfolioInvestments
+     * @param {Asset[]} assets
+     */
+    constructor(scope, portfolioInvestments, assets) {
+        /** @type {Scope} */
+        this.scope = scope;
+        /** @type {PortfolioInvestment[]} */
+        this.portfolioInvestments = portfolioInvestments;
+        /** @type {Asset[]} */
+        this.assets = assets;
+    }
+
+    /**
      * @param {{
      *     scope: Scope,
      *     portfolioInvestments: PortfolioInvestment[],
      *     assets: Asset[]
      * }=} properties
+     * @return {SimulationConfig}
      */
-    constructor(properties) {
+    static parseProperties(properties) {
         const sanitizedProperties = properties || {};
 
-        /** @type {Scope} */
-        this.scope = new Scope(sanitizedProperties.scope);
-        /** @type {PortfolioInvestment[]} */
-        this.portfolioInvestments = !sanitizedProperties.portfolioInvestments ? [] :
-            sanitizedProperties.portfolioInvestments.map(it => new PortfolioInvestment(it));
-        /** @type {Asset[]} */
-        this.assets = !sanitizedProperties.assets ? [] :
-            sanitizedProperties.assets.map(it => new Asset(it));
+        const scope = Scope.parseProperties(sanitizedProperties.scope);
+
+        const portfolioInvestments = !sanitizedProperties.portfolioInvestments ? [] :
+            sanitizedProperties.portfolioInvestments.map(it => PortfolioInvestment.parseProperties(it));
+
+        const assets = !sanitizedProperties.assets ? [] :
+            sanitizedProperties.assets.map(it => Asset.parseProperties(it));
+
+        return new SimulationConfig(scope, portfolioInvestments, assets);
     }
 
 }

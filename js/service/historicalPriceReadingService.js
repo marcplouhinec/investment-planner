@@ -37,10 +37,7 @@ const historicalPriceReadingService = {
         const rows = historicalPricesCsv.split('\n');
         for (let i = 1; i < rows.length; i++) {
             const values = rows[i].split(',');
-            historicalPrices.push(new HistoricalPrice({
-                date: values[0],
-                priceInUsd: Number(values[1])
-            }));
+            historicalPrices.push(new HistoricalPrice(LocalDate.parseString(values[0]), Number(values[1])));
         }
 
         return historicalPrices;
@@ -77,14 +74,13 @@ const historicalPriceReadingService = {
             }
 
             const rawPrice = String(secondCell.w).replaceAll(',', '');
-            historicalPrices.push(new HistoricalPrice({
-                date: new LocalDate({
+            historicalPrices.push(new HistoricalPrice(
+                LocalDate.parseProperties({
                     year: Number(matched.groups['year']),
                     month: this._MONTHS.indexOf(matched.groups['month']) + 1,
                     day: Number(matched.groups['day'])
                 }),
-                priceInUsd: Number(rawPrice)
-            }));
+                Number(rawPrice)));
         }
 
         return historicalPrices;

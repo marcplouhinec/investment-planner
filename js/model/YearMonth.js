@@ -4,20 +4,14 @@ import {LocalDate} from './LocalDate.js';
 class YearMonth {
 
     /**
-     * @param {{
-     *     year: number,
-     *     month: number
-     * }|string|null} properties
-     * @throws Error if the value is not parsable.
+     * @param {number} year
+     * @param {number} month
      */
-    constructor(properties) {
-        const sanitizedProperties = YearMonth._parseProperties(properties);
-
+    constructor(year, month) {
         /** @type {number} */
-        this.year = sanitizedProperties.year;
-
+        this.year = year;
         /** @type {number} */
-        this.month = sanitizedProperties.month;
+        this.month = month;
     }
 
     /**
@@ -66,21 +60,17 @@ class YearMonth {
      * @return {LocalDate}
      */
     atDay(day) {
-        return new LocalDate({
-            year: this.year,
-            month: this.month,
-            day: day
-        });
+        return new LocalDate(this.year, this.month, day);
     }
 
     /**
      * @return {YearMonth}
      */
     nextMonth() {
-        return new YearMonth({
-            year: this.month <= 11 ? this.year : this.year + 1,
-            month: this.month <= 11 ? this.month + 1 : 1
-        });
+        return new YearMonth(
+            this.month <= 11 ? this.year : this.year + 1,
+            this.month <= 11 ? this.month + 1 : 1
+        );
     }
 
     /**
@@ -111,10 +101,7 @@ class YearMonth {
             const startMonth = year === startIncl.year ? startIncl.month : 1;
             const endMonth = year === endIncl.year ? endIncl.month : 12;
             for (let month = startMonth; month <= endMonth; month++) {
-                yearMonths.push(new YearMonth({
-                    year: year,
-                    month: month
-                }));
+                yearMonths.push(new YearMonth(year, month));
             }
         }
 
@@ -158,18 +145,11 @@ class YearMonth {
 
     /**
      * @param {string} value
-     * @return {{
-     *     year: number,
-     *     month: number
-     * }}
-     * @throws Error if the value is not parsable.
+     * @return {YearMonth}
      */
-    static _parseString(value) {
+    static parseString(value) {
         if (value.trim().length === 0) {
-            return {
-                year: 0,
-                month: 0
-            };
+            return new YearMonth(0, 0);
         }
 
         const matched = value.match(/^(?<year>[0-9]{4})-(?<month>[0-9]{2})$/);
@@ -177,31 +157,41 @@ class YearMonth {
             throw new Error(`The value '${value}' is not a valid YearMonth. The correct syntax is 'YYYY-MM'.`);
         }
 
-        return {
-            year: Number(matched.groups['year']),
-            month: Number(matched.groups['month'])
-        };
+        const year = Number(matched.groups['year']);
+        const month = Number(matched.groups['month']);
+
+        return new YearMonth(year, month);
     }
 
     /**
      * @param {{
      *     year: number,
      *     month: number
-     * }|string|null} properties
-     * @return {{
+     * }|null} properties
+     * @return {YearMonth}
+     */
+    static parseProperties(properties) {
+        const sanitizedProperties = properties || {};
+
+        const year = !sanitizedProperties ? 0 : sanitizedProperties.year || 0;
+        const month = !sanitizedProperties ? 0 : sanitizedProperties.month || 0;
+
+        return new YearMonth(year, month);
+    }
+
+    /**
+     * @param {{
      *     year: number,
      *     month: number
-     * }}
-     * @throws Error if the value is not parsable.
+     * }|string|null} stringOrProperties
+     * @return {YearMonth}
      */
-    static _parseProperties(properties) {
-        if (typeof properties === 'string') {
-            return YearMonth._parseString(properties);
+    static parseStringOrProperties(stringOrProperties) {
+        if (typeof stringOrProperties === 'string') {
+            return YearMonth.parseString(stringOrProperties);
+        } else {
+            return YearMonth.parseProperties(stringOrProperties);
         }
-        return {
-            year: !properties ? 0 : properties.year || 0,
-            month: !properties ? 0 : properties.month || 0
-        };
     }
 }
 

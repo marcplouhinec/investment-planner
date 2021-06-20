@@ -3,21 +3,31 @@ import {YearMonth} from "./YearMonth.js";
 class Scope {
 
     /**
-     * @param {{
-     *     startYearMonth: YearMonth,
-     *     endYearMonth: YearMonth,
-     *     portfolioInvestmentStartYearMonth: YearMonth,
-     * }=} properties
+     * @param {YearMonth} startYearMonth
+     * @param {YearMonth} endYearMonth
      */
-    constructor(properties) {
-        const sanitizedProperties = properties || {};
-
+    constructor(startYearMonth, endYearMonth) {
         /** @type {YearMonth} */
-        this.startYearMonth = new YearMonth(sanitizedProperties.startYearMonth);
+        this.startYearMonth = startYearMonth;
         /** @type {YearMonth} */
-        this.endYearMonth = new YearMonth(sanitizedProperties.endYearMonth);
+        this.endYearMonth = endYearMonth;
     }
 
+    /**
+     * @param {{
+     *     startYearMonth: YearMonth,
+     *     endYearMonth: YearMonth
+     * }=} properties
+     * @return {Scope}
+     */
+    static parseProperties(properties) {
+        const sanitizedProperties = properties || {};
+
+        const startYearMonth = YearMonth.parseStringOrProperties(sanitizedProperties.startYearMonth);
+        const endYearMonth = YearMonth.parseStringOrProperties(sanitizedProperties.endYearMonth);
+
+        return new Scope(startYearMonth, endYearMonth);
+    }
 }
 
 export {Scope};

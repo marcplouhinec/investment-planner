@@ -8,10 +8,10 @@ describe('PortfolioInvestment', () => {
     describe('#findStartYearMonth()', () => {
         it('should work with multiple investments', () => {
             const investments = [
-                new PortfolioInvestment({phase1StartYearMonth: '2021-02'}),
-                new PortfolioInvestment({phase1StartYearMonth: '2021-05'}),
-                new PortfolioInvestment({phase1StartYearMonth: '2020-12'}),
-                new PortfolioInvestment({phase1StartYearMonth: '2020-10'}),
+                PortfolioInvestment.parseProperties({phase1StartYearMonth: '2021-02'}),
+                PortfolioInvestment.parseProperties({phase1StartYearMonth: '2021-05'}),
+                PortfolioInvestment.parseProperties({phase1StartYearMonth: '2020-12'}),
+                PortfolioInvestment.parseProperties({phase1StartYearMonth: '2020-10'}),
             ];
 
             const yearMonth = PortfolioInvestment.findStartYearMonth(investments);
@@ -24,10 +24,10 @@ describe('PortfolioInvestment', () => {
     describe('#findEndYearMonth()', () => {
         it('should work with multiple investments', () => {
             const investments = [
-                new PortfolioInvestment({phase3EndYearMonth: '2021-02'}),
-                new PortfolioInvestment({phase3EndYearMonth: '2021-05'}),
-                new PortfolioInvestment({phase3EndYearMonth: '2020-12'}),
-                new PortfolioInvestment({phase3EndYearMonth: '2020-10'}),
+                PortfolioInvestment.parseProperties({phase3EndYearMonth: '2021-02'}),
+                PortfolioInvestment.parseProperties({phase3EndYearMonth: '2021-05'}),
+                PortfolioInvestment.parseProperties({phase3EndYearMonth: '2020-12'}),
+                PortfolioInvestment.parseProperties({phase3EndYearMonth: '2020-10'}),
             ];
 
             const yearMonth = PortfolioInvestment.findEndYearMonth(investments);
@@ -39,7 +39,7 @@ describe('PortfolioInvestment', () => {
 
     describe('#computeWeightAt()', () => {
         it('should return null outside of scope', () => {
-            const investment = new PortfolioInvestment({
+            const investment = PortfolioInvestment.parseProperties({
                 assetCode: "FUND_001",
                 phase1StartYearMonth: "2021-07",
                 phase1InitialWeight: 60,
@@ -52,13 +52,13 @@ describe('PortfolioInvestment', () => {
                 enabled: true
             });
 
-            assert.equal(investment.computeWeightAt(new YearMonth('1980-01')), null);
-            assert.equal(investment.computeWeightAt(new YearMonth('2021-06')), null);
-            assert.equal(investment.computeWeightAt(new YearMonth('2065-02')), null);
+            assert.equal(investment.computeWeightAt(YearMonth.parseString('1980-01')), null);
+            assert.equal(investment.computeWeightAt(YearMonth.parseString('2021-06')), null);
+            assert.equal(investment.computeWeightAt(YearMonth.parseString('2065-02')), null);
         });
 
         it('should work at phase changing date', () => {
-            const investment = new PortfolioInvestment({
+            const investment = PortfolioInvestment.parseProperties({
                 assetCode: "FUND_001",
                 phase1StartYearMonth: "2021-07",
                 phase1InitialWeight: 60,
@@ -71,14 +71,14 @@ describe('PortfolioInvestment', () => {
                 enabled: true
             });
 
-            assert.equal(investment.computeWeightAt(new YearMonth('2021-07')), 60);
-            assert.equal(investment.computeWeightAt(new YearMonth('2035-01')), 55);
-            assert.equal(investment.computeWeightAt(new YearMonth('2050-01')), 20);
-            assert.equal(investment.computeWeightAt(new YearMonth('2065-01')), 15);
+            assert.equal(investment.computeWeightAt(YearMonth.parseString('2021-07')), 60);
+            assert.equal(investment.computeWeightAt(YearMonth.parseString('2035-01')), 55);
+            assert.equal(investment.computeWeightAt(YearMonth.parseString('2050-01')), 20);
+            assert.equal(investment.computeWeightAt(YearMonth.parseString('2065-01')), 15);
         });
 
         it('should work between phase changing date', () => {
-            const investment = new PortfolioInvestment({
+            const investment = PortfolioInvestment.parseProperties({
                 assetCode: "FUND_001",
                 phase1StartYearMonth: "2020-01",
                 phase1InitialWeight: 100,
@@ -91,9 +91,9 @@ describe('PortfolioInvestment', () => {
                 enabled: true
             });
 
-            assert.equal(investment.computeWeightAt(new YearMonth('2020-07')), 75);
-            assert.equal(investment.computeWeightAt(new YearMonth('2036-01')), 35);
-            assert.equal(investment.computeWeightAt(new YearMonth('2056-01')), 15);
+            assert.equal(investment.computeWeightAt(YearMonth.parseString('2020-07')), 75);
+            assert.equal(investment.computeWeightAt(YearMonth.parseString('2036-01')), 35);
+            assert.equal(investment.computeWeightAt(YearMonth.parseString('2056-01')), 15);
         });
     });
 });
