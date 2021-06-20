@@ -31,8 +31,8 @@ const portfolioSimulationController = {
 
     init: function () {
         // Listen to simulation config changes
-        simulationConfigService.registerConfigUpdatedListener(async simulationConfig => {
-            await this._refreshPortfolioSimulation(simulationConfig);
+        simulationConfigService.registerConfigUpdatedListener(async simulation => {
+            await this._refreshPortfolioSimulation(simulation.config);
         });
     },
 

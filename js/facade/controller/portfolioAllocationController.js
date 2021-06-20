@@ -1,7 +1,6 @@
 import {Chart, registerables} from '../../../vendors/chart.js-3.3.2/dist/chart.esm.js';
 import {simulationConfigService} from '../../service/simulationConfigService.js';
-import {YearMonth} from '../../model/YearMonth.js';
-import {PortfolioInvestment} from "../../model/PortfolioInvestment.js";
+import {Simulation} from "../../model/Simulation.js";
 import {chartColorUtils} from "../utils/chartColorUtils.js";
 
 const portfolioAllocationController = {
@@ -17,74 +16,49 @@ const portfolioAllocationController = {
         Chart.register(...registerables);
 
         // Listen to simulation config changes
-        simulationConfigService.registerConfigUpdatedListener(simulationConfig => {
-            this._refreshPortfolioAllocation(simulationConfig);
+        simulationConfigService.registerConfigUpdatedListener(simulation => {
+            this._refreshPortfolioAllocation(simulation);
         });
     },
 
     /**
-     * @param {SimulationConfig} config
+     * @param {Simulation} simulation
      */
-    _refreshPortfolioAllocation: function (config) {
-        // Generate the points in time
-        const yearMonths = YearMonth.generateRangeBetween(
-            PortfolioInvestment.findStartYearMonth(config.portfolioInvestments),
-            PortfolioInvestment.findEndYearMonth(config.portfolioInvestments));
-
-        // Compute the weight of each investment for each year-month
-        const enabledInvestments = config.portfolioInvestments.filter(investment => investment.enabled);
-
-        /** @type {{investment: PortfolioInvestment, weightByYearMonth: Map<YearMonth, number>}[]} */
-        const investmentAndWeightByYearMonth = enabledInvestments.map(investment => {
-            const weightByYearMonth = new Map();
-            yearMonths.forEach(yearMonth => {
-                weightByYearMonth.set(yearMonth, investment.computeWeightAt(yearMonth));
-            });
-
-            return {
-                investment: investment,
-                weightByYearMonth: weightByYearMonth
-            };
-        });
-
-        // Scale the weights so that their sum become equals to 100
-        /** @type {Map<YearMonth, number>} */
-        const totalWeightByYearMonth = new Map();
-        yearMonths.forEach(yearMonth => {
-            const totalWeight = investmentAndWeightByYearMonth
-                .map(it => it.weightByYearMonth.get(yearMonth))
-                .reduce((total, value) => total + value, 0);
-            totalWeightByYearMonth.set(yearMonth, totalWeight);
-        });
-
-        /** @type {{investment: PortfolioInvestment, percentageByYearMonth: Map<YearMonth, number>}[]} */
-        const investmentAndPercentageByYearMonth = investmentAndWeightByYearMonth.map(it => {
-            /** @type {Map<YearMonth, number>} */
-            const percentageByYearMonth = new Map();
-            it.weightByYearMonth.forEach((weight, yearMonth) => {
-                const totalWeight = totalWeightByYearMonth.get(yearMonth);
-                percentageByYearMonth.set(yearMonth, weight * 100 / totalWeight);
-            });
-
-            return {
-                investment: it.investment,
-                percentageByYearMonth: percentageByYearMonth
-            };
-        });
+    _refreshPortfolioAllocation: function (simulation) {
+        const allocationByYearMonthByAssetCode = simulation.getPortfolioMonthlyAssetAllocationByYearMonthByAssetCode();
 
         // Draw the asset weight line chart
-        const assetWeightLineChartData = {
-            labels: yearMonths.map(it => it.toString()),
-            datasets: investmentAndPercentageByYearMonth
-                .map((it, index) => {
-                    const chartColor = chartColorUtils.getChartColorByIndex(index);
-                    return {
-                        label: it.investment.assetCode,
-                        backgroundColor: chartColor.backgroundColor,
-                        borderColor: chartColor.borderColor,
-                        data: yearMonths.map(yearMonth => it.percentageByYearMonth.get(yearMonth))
-                    };
+        /**
+         * @type {{
+         *     label: string,
+         *     backgroundColor: string,
+         *     borderColor: string,
+         *     fill: string,
+         *     data: number[]
+         * }[]}
+         */
+        const assetWeightLineChartDatasets = [];
+        let assetIndex = 0;
+        for (const [assetCode, allocationByYearMonth] of allocationByYearMonthByAssetCode) {
+            const chartColor = chartColorUtils.getChartColorByIndex(assetIndex);
+
+            assetWeightLineChartDatasets.push({
+                label: assetCode,
+                backgroundColor: chartColor.backgroundColor,
+                borderColor: chartColor.borderColor,
+                data: simulation.portfolioYearMonths.map(yearMonth => {
+                    /** @type {MonthlyAssetAllocation} */
+                    const allocation = allocationByYearMonth.get(yearMonth.toString());
+                    return allocation.allocationRatio * 100;
                 })
+            });
+
+            assetIndex++;
+        }
+
+        const assetWeightLineChartData = {
+            labels: simulation.portfolioYearMonths.map(it => it.toString()),
+            datasets: assetWeightLineChartDatasets
         };
 
         if (this._assetWeightLineChart !== null) {
@@ -114,23 +88,29 @@ const portfolioAllocationController = {
          * }[]}
          */
         const assetWeightAreaChartDatasets = [];
-        for (let i = 0; i < investmentAndPercentageByYearMonth.length; i++) {
-            const entry = investmentAndPercentageByYearMonth[i];
-            const chartColor = chartColorUtils.getChartColorByIndex(i);
+        assetIndex = 0;
+        for (const [assetCode, allocationByYearMonth] of allocationByYearMonthByAssetCode) {
+            const chartColor = chartColorUtils.getChartColorByIndex(assetIndex);
 
             assetWeightAreaChartDatasets.push({
-                label: entry.investment.assetCode,
+                label: assetCode,
                 backgroundColor: chartColor.borderColor,
                 borderColor: chartColor.borderColor,
                 fill: 'origin',
-                data: yearMonths.map((yearMonth, ymIndex) => {
-                    const previousValue = i === 0 ? 0 : assetWeightAreaChartDatasets[i - 1].data[ymIndex];
-                    return previousValue + entry.percentageByYearMonth.get(yearMonth);
+                data: simulation.portfolioYearMonths.map((yearMonth, ymIndex) => {
+                    /** @type {MonthlyAssetAllocation} */
+                    const allocation = allocationByYearMonth.get(yearMonth.toString());
+
+                    const previousValue = assetIndex === 0 ? 0 : assetWeightAreaChartDatasets[assetIndex - 1].data[ymIndex];
+                    return previousValue + allocation.allocationRatio * 100;
                 })
             });
+
+            assetIndex++;
         }
+
         const assetWeightAreaChartData = {
-            labels: yearMonths.map(it => it.toString()),
+            labels: simulation.portfolioYearMonths.map(it => it.toString()),
             datasets: assetWeightAreaChartDatasets
         };
 
