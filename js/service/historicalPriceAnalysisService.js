@@ -2,6 +2,7 @@ import {HistoricalPrice} from '../model/HistoricalPrice.js';
 import {YearMonth} from '../model/YearMonth.js';
 import {LocalDate} from '../model/LocalDate.js';
 import {RegressionResult} from '../model/RegressionResult.js';
+import {MonthlyPrediction} from '../model/MonthlyPrediction.js';
 
 const historicalPriceAnalysisService = {
 
@@ -101,18 +102,20 @@ const historicalPriceAnalysisService = {
     /**
      * @param {RegressionResult} regressionResult
      * @param {YearMonth} endYearMonth
-     * @return {{yearMonth: YearMonth, avgPriceInUsd: number}[]}
+     * @return {MonthlyPrediction[]}
      */
-    generateMonthlyEstimations: function (regressionResult,
+    generateMonthlyPredictions: function (regressionResult,
                                           endYearMonth) {
         const startYearMonth = regressionResult.startDate.toYearMonth();
 
         return YearMonth.generateRangeBetween(startYearMonth, endYearMonth)
             .map((yearMonth, index) => {
-                return {
-                    yearMonth: yearMonth,
-                    avgPriceInUsd: regressionResult.startPriceInUsd * Math.pow(1 + regressionResult.monthlyPerformance, index)
-                };
+                const avgPriceInUsd = regressionResult.startPriceInUsd * Math.pow(1 + regressionResult.monthlyPerformance, index);
+                return new MonthlyPrediction(
+                    yearMonth,
+                    avgPriceInUsd,
+                    avgPriceInUsd - 2 * regressionResult.standardError,
+                    avgPriceInUsd + 2 * regressionResult.standardError);
             });
     },
 

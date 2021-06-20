@@ -125,11 +125,15 @@ describe('historicalPriceAnalysisService', () => {
         });
     });
 
-    describe('#generateMonthlyEstimations()', () => {
+    describe('#generateMonthlyPredictions()', () => {
         it('should generate for few months', () => {
             const result = new RegressionResult(
-                new LocalDate('2001-01-01'), new LocalDate('2010-01-01'), 100, 0.006);
-            const estimations = historicalPriceAnalysisService.generateMonthlyEstimations(
+                new LocalDate('2001-01-01'),
+                new LocalDate('2010-01-01'),
+                100,
+                0.006,
+                10);
+            const estimations = historicalPriceAnalysisService.generateMonthlyPredictions(
                 result, new YearMonth('2001-04'));
 
             assert.equal(estimations.length, 4);
@@ -141,6 +145,14 @@ describe('historicalPriceAnalysisService', () => {
             assert.equal(estimations[1].avgPriceInUsd, 100.6);
             assert.equal(estimations[2].avgPriceInUsd, 101.2036);
             assert.equal(estimations[3].avgPriceInUsd, 101.8108216);
+            assert.equal(estimations[0].lower95PriceInUsd, 100 - 2 * 10);
+            assert.equal(estimations[1].lower95PriceInUsd, 100.6 - 2 * 10);
+            assert.equal(estimations[2].lower95PriceInUsd, 101.2036 - 2 * 10);
+            assert.equal(estimations[3].lower95PriceInUsd, 101.8108216 - 2 * 10);
+            assert.equal(estimations[0].upper95PriceInUsd, 100 + 2 * 10);
+            assert.equal(estimations[1].upper95PriceInUsd, 100.6 + 2 * 10);
+            assert.equal(estimations[2].upper95PriceInUsd, 101.2036 + 2 * 10);
+            assert.equal(estimations[3].upper95PriceInUsd, 101.8108216 + 2 * 10);
         });
     });
 });

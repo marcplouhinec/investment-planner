@@ -6,7 +6,6 @@ import {Asset} from '../../model/Asset.js';
 import {HistoricalPrice} from '../../model/HistoricalPrice.js';
 import {chartColorUtils} from "../utils/chartColorUtils.js";
 import {YearMonth} from "../../model/YearMonth.js";
-import {LocalDate} from "../../model/LocalDate.js";
 import {RegressionResult} from "../../model/RegressionResult.js";
 
 const portfolioSimulationController = {
@@ -15,12 +14,16 @@ const portfolioSimulationController = {
     _assetByCode: new Map(),
     /** @type {Map<Asset, HistoricalPrice[]>} */
     _historicalPricesByAsset: new Map(),
+    /** @type {Map<Asset, {yearMonth: YearMonth, historicalPrice: HistoricalPrice}[]>} */
+    _monthlyHistoricalPricesByAsset: new Map(),
     /** @type {Map<Asset, Map<string, HistoricalPrice>>} */
     _historicalPriceByLocalDateByAsset: new Map(),
     /** @type {Map<Asset, {performance: number, stdDev: number}>} */
     _annualizedPerfAndStdDevByAsset: new Map(),
     /** @type {Map<Asset, RegressionResult>} */
     _regressionResultByAsset: new Map(),
+    /** @type {Map<Asset, MonthlyPrediction[]>} */
+    _monthlyPredictionsByAsset: new Map(),
     /** @type {?Chart} */
     _assetPerfStdDevXyScatterChart: null,
     /** @type {?Chart} */
@@ -59,10 +62,17 @@ const portfolioSimulationController = {
                 this._historicalPriceByLocalDateByAsset.set(asset, HistoricalPrice.mapByStringDate(historicalPrices));
             }
         }
-
-        // Calculate the annualized performance and standard deviation for all assets
         const startYearMonth = config.scope.startYearMonth;
         const endYearMonth = config.scope.endYearMonth;
+        for (let asset of config.assets) {
+            if (!this._monthlyHistoricalPricesByAsset.has(asset)) {
+                const historicalPrices = this._historicalPricesByAsset.get(asset);
+                this._monthlyHistoricalPricesByAsset.set(
+                    asset, HistoricalPrice.findAllEveryMonthBetween(historicalPrices, startYearMonth, endYearMonth));
+            }
+        }
+
+        // Calculate the annualized performance and standard deviation for all assets
         for (let asset of config.assets) {
             if (!this._annualizedPerfAndStdDevByAsset.has(asset)) {
                 const prices = this._historicalPricesByAsset.get(asset);
@@ -83,6 +93,15 @@ const portfolioSimulationController = {
 
                 this._regressionResultByAsset.set(
                     asset, historicalPriceAnalysisService.calculateRegression(prices, startYearMonth, endYearMonth));
+            }
+        }
+
+        // Calculate monthly predictions for all assets
+        for (let asset of config.assets) {
+            if (!this._monthlyPredictionsByAsset.has(asset)) {
+                const regressionResult = this._regressionResultByAsset.get(asset);
+                this._monthlyPredictionsByAsset.set(
+                    asset, historicalPriceAnalysisService.generateMonthlyPredictions(regressionResult, endYearMonth));
             }
         }
 
@@ -176,77 +195,99 @@ const portfolioSimulationController = {
             );
         }
 
-        // Draw the assets historical prices, annualized performance, and 95% envelope
+        // Draw the assets historical prices, regression line, and 95% envelope
         const enabledInvestments = config.portfolioInvestments
             .filter(investment => investment.enabled)
             .filter(investment => this._assetByCode.has(investment.assetCode));
-        const startLocalDate = enabledInvestments
-            .map(investment => {
-                const asset = this._assetByCode.get(investment.assetCode);
-                const historicalPrices = this._historicalPricesByAsset.get(asset);
-                return historicalPrices[0].date;
-            })
-            .reduce((minDate, currentDate) =>
-                !minDate ? currentDate : minDate.isBefore(currentDate) ? minDate : currentDate);
-        const yearMonths = YearMonth.generateRangeBetween(startLocalDate.toYearMonth(), endYearMonth);
 
-        const portfolioAssetPriceLineChartData = {
-            labels: yearMonths.map(it => it.toString()),
-            datasets: enabledInvestments
-                .map((investment, index) => {
-                    const asset = this._assetByCode.get(investment.assetCode);
-                    const historicalPrices = this._historicalPricesByAsset.get(asset);
-                    const historicalPriceByLocalDate = this._historicalPriceByLocalDateByAsset.get(asset);
-                    const dates = historicalPrices.map(price => price.date);
-                    const earliestDate = dates[0];
-                    const latestDate = dates[dates.length - 1];
-
-                    const chartColor = chartColorUtils.getChartColorByIndex(index);
-                    return {
-                        label: investment.assetCode,
-                        backgroundColor: chartColor.backgroundColor,
-                        borderColor: chartColor.borderColor,
-                        data: yearMonths.map(yearMonth => {
-                            const localDate = yearMonth.atDay(1);
-                            if (localDate.isBefore(earliestDate) || localDate.isAfter(latestDate)) {
-                                return null;
-                            }
-                            const date = LocalDate.findClosestAvailableLocalDate(dates, localDate);
-                            return historicalPriceByLocalDate.get(date.toString()).priceInUsd;
-                        })
-                    };
-                })
-        };
-
-        // TODO
-        const simulatedDataSet = enabledInvestments
+        const chartStartYearMonth = enabledInvestments
             .map((investment, index) => {
                 const asset = this._assetByCode.get(investment.assetCode);
-                const result = this._regressionResultByAsset.get(asset);
+                const monthlyHistoricalPrices = this._monthlyHistoricalPricesByAsset.get(asset);
 
-                const simulatedHistoricalPrices = historicalPriceAnalysisService.generateMonthlyEstimations(
-                    result, new YearMonth('2031-06'));
+                return monthlyHistoricalPrices[0].yearMonth;
+            })
+            .reduce((minYearMonth, currentValue) =>
+                minYearMonth && minYearMonth.isBefore(currentValue) ? minYearMonth : currentValue);
+        const yearMonths = YearMonth.generateRangeBetween(chartStartYearMonth, endYearMonth);
 
-                const simulatedHistoricalPriceByYearMonth = new Map();
-                for (let simulatedHistoricalPrice of simulatedHistoricalPrices) {
-                    simulatedHistoricalPriceByYearMonth.set(simulatedHistoricalPrice.yearMonth.toString(), simulatedHistoricalPrice);
-                }
+        const portfolioAssetPriceDatasets = enabledInvestments
+            .map((investment, index) => {
+                const asset = this._assetByCode.get(investment.assetCode);
+                const monthlyHistoricalPrices = this._monthlyHistoricalPricesByAsset.get(asset);
+                const minYearMonth = monthlyHistoricalPrices[0].yearMonth;
+                const maxYearMonth = monthlyHistoricalPrices[monthlyHistoricalPrices.length - 1].yearMonth;
 
                 const chartColor = chartColorUtils.getChartColorByIndex(index);
                 return {
-                    label: investment.assetCode + '_SIMULATED',
+                    label: investment.assetCode,
                     backgroundColor: chartColor.backgroundColor,
                     borderColor: chartColor.borderColor,
                     data: yearMonths.map(yearMonth => {
-                        const simulatedHistoricalPrice = simulatedHistoricalPriceByYearMonth.get(yearMonth.toString());
-                        if (!simulatedHistoricalPrice) {
+                        if (yearMonth.isBefore(minYearMonth) || yearMonth.isAfter(maxYearMonth)) {
                             return null;
                         }
-                        return simulatedHistoricalPrice.avgPriceInUsd;
+                        const index = YearMonth.nbMonthsBetween(minYearMonth, yearMonth);
+                        return monthlyHistoricalPrices[index].historicalPrice.priceInUsd;
                     })
                 };
             });
-        portfolioAssetPriceLineChartData.datasets = portfolioAssetPriceLineChartData.datasets.concat(simulatedDataSet);
+
+        const regressionDataSet = enabledInvestments
+            .flatMap((investment, index) => {
+                const asset = this._assetByCode.get(investment.assetCode);
+                const monthlyPredictions = this._monthlyPredictionsByAsset.get(asset);
+
+                const monthlyPredictionByYearMonth = new Map();
+                for (let monthlyPrediction of monthlyPredictions) {
+                    monthlyPredictionByYearMonth.set(monthlyPrediction.yearMonth.toString(), monthlyPrediction);
+                }
+
+                const chartColor = chartColorUtils.getChartColorByIndex(index);
+                return [
+                    {
+                        label: investment.assetCode + ' (regression)',
+                        backgroundColor: chartColor.backgroundColor,
+                        borderColor: chartColor.borderColor,
+                        data: yearMonths.map(yearMonth => {
+                            const monthlyPrediction = monthlyPredictionByYearMonth.get(yearMonth.toString());
+                            if (!monthlyPrediction) {
+                                return null;
+                            }
+                            return monthlyPrediction.avgPriceInUsd;
+                        })
+                    },
+                    {
+                        label: investment.assetCode + ' (lower 95%)',
+                        backgroundColor: chartColor.backgroundColor,
+                        borderColor: chartColor.borderColor,
+                        data: yearMonths.map(yearMonth => {
+                            const monthlyPrediction = monthlyPredictionByYearMonth.get(yearMonth.toString());
+                            if (!monthlyPrediction) {
+                                return null;
+                            }
+                            return monthlyPrediction.lower95PriceInUsd;
+                        })
+                    },
+                    {
+                        label: investment.assetCode + ' (upper 95%)',
+                        backgroundColor: chartColor.backgroundColor,
+                        borderColor: chartColor.borderColor,
+                        data: yearMonths.map(yearMonth => {
+                            const monthlyPrediction = monthlyPredictionByYearMonth.get(yearMonth.toString());
+                            if (!monthlyPrediction) {
+                                return null;
+                            }
+                            return monthlyPrediction.upper95PriceInUsd;
+                        })
+                    }
+                ];
+            });
+
+        const portfolioAssetPriceLineChartData = {
+            labels: yearMonths.map(it => it.toString()),
+            datasets: portfolioAssetPriceDatasets.concat(regressionDataSet)
+        };
 
         if (this._portfolioAssetPriceLineChart !== null) {
             this._portfolioAssetPriceLineChart.data = portfolioAssetPriceLineChartData;
@@ -258,9 +299,10 @@ const portfolioSimulationController = {
                     type: 'line',
                     options: {
                         pointRadius: 0,
+                        aspectRatio: 1,
                         plugins: {
                             legend: {
-                                position: 'top',
+                                position: 'top'
                             },
                             title: {
                                 display: true,
