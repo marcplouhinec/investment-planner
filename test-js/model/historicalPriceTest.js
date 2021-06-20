@@ -5,25 +5,6 @@ const assert = chai.assert;
 const expect = chai.expect;
 
 describe('HistoricalPrice', () => {
-    describe('#mapByStringDate()', () => {
-        it('should work empty array', () => {
-            const map = HistoricalPrice.mapByStringDate([]);
-            assert.equal(map.size, 0);
-        });
-
-        it('should work with multiple items', () => {
-            const map = HistoricalPrice.mapByStringDate([
-                new HistoricalPrice({date: '2021-04-10', priceInUsd: 410}),
-                new HistoricalPrice({date: '2021-04-15', priceInUsd: 415}),
-                new HistoricalPrice({date: '2021-05-02', priceInUsd: 502}),
-            ]);
-            assert.equal(map.size, 3);
-            assert.equal(map.get('2021-04-10').priceInUsd, 410);
-            assert.equal(map.get('2021-04-15').priceInUsd, 415);
-            assert.equal(map.get('2021-05-02').priceInUsd, 502);
-        });
-    });
-
     describe('#findAllEveryMonthBetween()', () => {
         it('should work empty array', () => {
             const mhPrices = HistoricalPrice.findAllEveryMonthBetween([], new YearMonth('2020-01'), new YearMonth('2020-02'));

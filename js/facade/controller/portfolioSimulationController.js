@@ -16,8 +16,6 @@ const portfolioSimulationController = {
     _historicalPricesByAsset: new Map(),
     /** @type {Map<Asset, {yearMonth: YearMonth, historicalPrice: HistoricalPrice}[]>} */
     _monthlyHistoricalPricesByAsset: new Map(),
-    /** @type {Map<Asset, Map<string, HistoricalPrice>>} */
-    _historicalPriceByLocalDateByAsset: new Map(),
     /** @type {Map<Asset, {performance: number, stdDev: number}>} */
     _annualizedPerfAndStdDevByAsset: new Map(),
     /** @type {Map<Asset, RegressionResult>} */
@@ -54,12 +52,6 @@ const portfolioSimulationController = {
             if (!this._historicalPricesByAsset.has(asset)) {
                 const prices = await historicalPriceReadingService.readHistoricalPrices(asset);
                 this._historicalPricesByAsset.set(asset, prices);
-            }
-        }
-        for (let asset of config.assets) {
-            if (!this._historicalPriceByLocalDateByAsset.has(asset)) {
-                const historicalPrices = this._historicalPricesByAsset.get(asset);
-                this._historicalPriceByLocalDateByAsset.set(asset, HistoricalPrice.mapByStringDate(historicalPrices));
             }
         }
         const startYearMonth = config.scope.startYearMonth;
@@ -201,7 +193,7 @@ const portfolioSimulationController = {
             .filter(investment => this._assetByCode.has(investment.assetCode));
 
         const chartStartYearMonth = enabledInvestments
-            .map((investment, index) => {
+            .map(investment => {
                 const asset = this._assetByCode.get(investment.assetCode);
                 const monthlyHistoricalPrices = this._monthlyHistoricalPricesByAsset.get(asset);
 

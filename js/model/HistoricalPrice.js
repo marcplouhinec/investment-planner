@@ -92,20 +92,6 @@ class HistoricalPrice {
 
         return monthlyHistoricalPrices;
     }
-
-    /**
-     * @param {HistoricalPrice[]} historicalPrices
-     * @return {Map<string, HistoricalPrice>}
-     */
-    static mapByStringDate(historicalPrices) {
-        const historicalPriceByDate = new Map();
-
-        for (let historicalPrice of historicalPrices) {
-            historicalPriceByDate.set(historicalPrice.date.toString(), historicalPrice);
-        }
-
-        return historicalPriceByDate;
-    }
 }
 
 export {HistoricalPrice};
