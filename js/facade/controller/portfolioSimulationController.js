@@ -7,6 +7,7 @@ import {HistoricalPrice} from '../../model/HistoricalPrice.js';
 import {chartColorUtils} from "../utils/chartColorUtils.js";
 import {YearMonth} from "../../model/YearMonth.js";
 import {LocalDate} from "../../model/LocalDate.js";
+import {RegressionResult} from "../../model/RegressionResult.js";
 
 const portfolioSimulationController = {
 
@@ -18,8 +19,12 @@ const portfolioSimulationController = {
     _historicalPriceByLocalDateByAsset: new Map(),
     /** @type {Map<Asset, {performance: number, stdDev: number}>} */
     _annualizedPerfAndStdDevByAsset: new Map(),
+    /** @type {Map<Asset, RegressionResult>} */
+    _regressionResultByAsset: new Map(),
     /** @type {?Chart} */
     _assetPerfStdDevXyScatterChart: null,
+    /** @type {?Chart} */
+    _assetMonthlyPerfStdErrXyScatterChart: null,
     /** @type {?Chart} */
     _portfolioAssetPriceLineChart: null,
 
@@ -71,6 +76,16 @@ const portfolioSimulationController = {
             }
         }
 
+        // Calculate a regression for all assets
+        for (let asset of config.assets) {
+            if (!this._regressionResultByAsset.has(asset)) {
+                const prices = this._historicalPricesByAsset.get(asset);
+
+                this._regressionResultByAsset.set(
+                    asset, historicalPriceAnalysisService.calculateRegression(prices, startYearMonth, endYearMonth));
+            }
+        }
+
         // Draw the asset performance / Standard Deviation XY scatter chart
         const assetPerfStdDevXyScatterChartData = {
             datasets: config.assets.map((asset, index) => {
@@ -80,7 +95,7 @@ const portfolioSimulationController = {
                     label: asset.code,
                     data: [{
                         x: annualizedPerfAndStdDev.stdDev,
-                        y: annualizedPerfAndStdDev.performance
+                        y: annualizedPerfAndStdDev.performance * 100
                     }],
                     backgroundColor: chartColor.borderColor
                 };
@@ -108,7 +123,52 @@ const portfolioSimulationController = {
                             },
                             title: {
                                 display: true,
-                                text: 'Annualized Standard Deviation / Annualized performance'
+                                text: 'Annualized Standard Deviation / Annualized performance (%)'
+                            }
+                        }
+                    }
+                }
+            );
+        }
+
+        // Draw the asset monthly performance / Standard Error XY scatter chart
+        const assetMonthlyPerfStdErrXyScatterChartData = {
+            datasets: config.assets.map((asset, index) => {
+                const chartColor = chartColorUtils.getChartColorByIndex(index);
+                const result = this._regressionResultByAsset.get(asset);
+                return {
+                    label: asset.code,
+                    data: [{
+                        x: result.standardError,
+                        y: result.monthlyPerformance * 100
+                    }],
+                    backgroundColor: chartColor.borderColor
+                };
+            })
+        };
+        if (this._assetMonthlyPerfStdErrXyScatterChart !== null) {
+            this._assetMonthlyPerfStdErrXyScatterChart.data = assetMonthlyPerfStdErrXyScatterChartData;
+            this._assetMonthlyPerfStdErrXyScatterChart.update();
+        } else {
+            this._assetMonthlyPerfStdErrXyScatterChart = new Chart(
+                document.getElementById('asset-monthly_perf-stderr-xy-scatter-chart'),
+                {
+                    type: 'scatter',
+                    data: assetMonthlyPerfStdErrXyScatterChartData,
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                position: 'bottom'
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Monthly Standard Error / Monthly performance (%)'
                             }
                         }
                     }
@@ -162,10 +222,7 @@ const portfolioSimulationController = {
         const simulatedDataSet = enabledInvestments
             .map((investment, index) => {
                 const asset = this._assetByCode.get(investment.assetCode);
-                const historicalPrices = this._historicalPricesByAsset.get(asset);
-
-                const result = historicalPriceAnalysisService.calculateRegression(
-                    historicalPrices, config.scope.startYearMonth, config.scope.endYearMonth);
+                const result = this._regressionResultByAsset.get(asset);
 
                 const simulatedHistoricalPrices = historicalPriceAnalysisService.generateMonthlyEstimations(
                     result, new YearMonth('2031-06'));
