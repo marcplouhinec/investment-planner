@@ -143,6 +143,66 @@ class Simulation {
 
         return allocationByYearMonthByAssetCode;
     }
+
+    /**
+     * @return {{year: number, monthlyPerformance: number, standardError: number}[]}
+     */
+    getAllPortfolioMonthlyPerformanceAndStandardErrorPerYear() {
+        // Find the earliest January
+        let firstYear = 0;
+        for (const yearMonth of this.portfolioYearMonths) {
+            if (yearMonth.month === 1) {
+                firstYear = yearMonth.year;
+                break;
+            }
+        }
+
+        // Find the latest January
+        let lastYear = 0;
+        for (let i = this.portfolioYearMonths.length - 1; i >= 0; i--) {
+            const yearMonth = this.portfolioYearMonths[i];
+            if (yearMonth.month === 1) {
+                lastYear = yearMonth.year;
+                break;
+            }
+        }
+
+        // Group monthly asset allocations by year month
+        /** @type {Map<string, MonthlyAssetAllocation[]>} */
+        const allocationsByYearMonth = new Map();
+        for (let allocation of this.monthlyAssetAllocations) {
+            const formattedYearMonth = allocation.yearMonth.toString();
+            let allocations = allocationsByYearMonth.get(formattedYearMonth);
+
+            if (!allocations) {
+                allocations = [];
+                allocationsByYearMonth.set(formattedYearMonth, allocations);
+            }
+
+            allocations.push(allocation);
+        }
+
+        // Calculate the monthly performance and standard error per year
+        /** @type {{year: number, monthlyPerformance: number, standardError: number}[]} */
+        const portfolioMonthlyPerformanceAndStandardErrorPerYear = [];
+        for (let year = firstYear; year <= lastYear; year++) {
+            const januaryAllocations = allocationsByYearMonth.get(new YearMonth(year, 1).toString());
+
+            let monthlyPerformance = 0;
+            let standardError = 0;
+            for (const januaryAllocation of januaryAllocations) {
+                const result = this.regressionResultByAssetCode.get(januaryAllocation.assetCode);
+                monthlyPerformance += result.monthlyPerformance * januaryAllocation.allocationRatio;
+                standardError += result.standardError * januaryAllocation.allocationRatio;
+            }
+
+            portfolioMonthlyPerformanceAndStandardErrorPerYear.push({
+                year, monthlyPerformance, standardError
+            });
+        }
+
+        return portfolioMonthlyPerformanceAndStandardErrorPerYear;
+    }
 }
 
 export {Simulation};

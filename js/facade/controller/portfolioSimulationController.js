@@ -70,19 +70,33 @@ const portfolioSimulationController = {
         }
 
         // Draw the asset monthly performance / Standard Error XY scatter chart
+        const assetMonthlyPerfStdErrXyScatterChartDataSets = simulation.config.assets.map((asset, index) => {
+            const chartColor = chartColorUtils.getChartColorByIndex(index);
+            const result = simulation.regressionResultByAssetCode.get(asset.code);
+            return {
+                label: asset.code,
+                data: [{
+                    x: result.standardError,
+                    y: result.monthlyPerformance * 100
+                }],
+                backgroundColor: chartColor.borderColor
+            };
+        });
+        // Add the portfolio monthly performance / Standard Error across time
+        const portfolioMPerfAndStdErrPerYear = simulation.getAllPortfolioMonthlyPerformanceAndStandardErrorPerYear();
+        const portfolioMPerfAndStdErrPerYearXyScatterChartDataSets = portfolioMPerfAndStdErrPerYear.map((it, index) => {
+            const redColor = Math.round(index * 255 / portfolioMPerfAndStdErrPerYear.length);
+            return {
+                label: '' + it.year,
+                data: [{
+                    x: it.standardError,
+                    y: it.monthlyPerformance * 100
+                }],
+                backgroundColor: 'rgb(' + redColor + ', 99, 132)'
+            };
+        });
         const assetMonthlyPerfStdErrXyScatterChartData = {
-            datasets: simulation.config.assets.map((asset, index) => {
-                const chartColor = chartColorUtils.getChartColorByIndex(index);
-                const result = simulation.regressionResultByAssetCode.get(asset.code);
-                return {
-                    label: asset.code,
-                    data: [{
-                        x: result.standardError,
-                        y: result.monthlyPerformance * 100
-                    }],
-                    backgroundColor: chartColor.borderColor
-                };
-            })
+            datasets: assetMonthlyPerfStdErrXyScatterChartDataSets.concat(portfolioMPerfAndStdErrPerYearXyScatterChartDataSets)
         };
         if (this._assetMonthlyPerfStdErrXyScatterChart !== null) {
             this._assetMonthlyPerfStdErrXyScatterChart.data = assetMonthlyPerfStdErrXyScatterChartData;
