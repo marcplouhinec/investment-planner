@@ -2,6 +2,9 @@ import {SimulationConfig} from './SimulationConfig.js';
 import {YearMonth} from "./YearMonth.js";
 import {PortfolioInvestment} from "./PortfolioInvestment.js";
 import {MonthlyAssetAllocation} from "./MonthlyAssetAllocation.js";
+import {historicalPriceReadingService} from "../service/historicalPriceReadingService.js";
+import {HistoricalPrice} from "./HistoricalPrice.js";
+import {historicalPriceAnalysisService} from "../service/historicalPriceAnalysisService.js";
 
 class Simulation {
 
@@ -17,12 +20,27 @@ class Simulation {
 
         /** @type {MonthlyAssetAllocation[]} */
         this.monthlyAssetAllocations = [];
+
+        /** @type {Map<string, HistoricalPrice[]>} */
+        this.historicalPricesByAssetCode = new Map();
+
+        /** @type {Map<string, {yearMonth: YearMonth, historicalPrice: HistoricalPrice}[]>} */
+        this.monthlyHistoricalPricesByAssetCode = new Map();
+
+        /** @type {Map<string, {performance: number, stdDev: number}>} */
+        this.annualizedPerfAndStdDevByAssetCode = new Map();
+
+        /** @type {Map<string, RegressionResult>} */
+        this.regressionResultByAssetCode = new Map();
+
+        /** @type {Map<string, MonthlyPrediction[]>} */
+        this.monthlyPredictionsByAssetCode = new Map();
     }
 
     /**
      * @param {SimulationConfig} config
      */
-    update(config) {
+    async update(config) {
         this.config = config;
 
         // Generate a range of months in which the portfolio is defined
@@ -48,6 +66,60 @@ class Simulation {
                 const weight = investmentWeights[i];
                 this.monthlyAssetAllocations.push(new MonthlyAssetAllocation(
                     yearMonth, investment.assetCode, weight, weight / totalWeight));
+            }
+        }
+
+        // Load the asset prices
+        for (let asset of config.assets) {
+            if (!this.historicalPricesByAssetCode.has(asset.code)) {
+                const prices = await historicalPriceReadingService.readHistoricalPrices(asset);
+                this.historicalPricesByAssetCode.set(asset.code, prices);
+            }
+        }
+
+        // Extract the closest price for each month for each asset
+        for (let asset of config.assets) {
+            if (!this.monthlyHistoricalPricesByAssetCode.has(asset.code)) {
+                const historicalPrices = this.historicalPricesByAssetCode.get(asset.code);
+                this.monthlyHistoricalPricesByAssetCode.set(
+                    asset.code,
+                    HistoricalPrice.findAllEveryMonthBetween(
+                        historicalPrices, config.scope.startYearMonth, config.scope.endYearMonth));
+            }
+        }
+
+        // Calculate the annualized performance and standard deviation for all assets
+        for (let asset of config.assets) {
+            if (!this.annualizedPerfAndStdDevByAssetCode.has(asset.code)) {
+                const prices = this.historicalPricesByAssetCode.get(asset.code);
+
+                this.annualizedPerfAndStdDevByAssetCode.set(asset.code, {
+                    performance: historicalPriceAnalysisService.calculateAnnualizedPerformance(
+                        prices, config.scope.startYearMonth, config.scope.endYearMonth),
+                    stdDev: historicalPriceAnalysisService.calculateAnnualizedPerformanceStandardDeviation(
+                        prices, config.scope.startYearMonth, config.scope.endYearMonth)
+                });
+            }
+        }
+
+        // Calculate a regression for all assets
+        for (let asset of config.assets) {
+            if (!this.regressionResultByAssetCode.has(asset.code)) {
+                const prices = this.historicalPricesByAssetCode.get(asset.code);
+
+                this.regressionResultByAssetCode.set(asset.code,
+                    historicalPriceAnalysisService.calculateRegression(
+                        prices, config.scope.startYearMonth, config.scope.endYearMonth));
+            }
+        }
+
+        // Calculate monthly predictions for all assets
+        for (let asset of config.assets) {
+            if (!this.monthlyPredictionsByAssetCode.has(asset.code)) {
+                const regressionResult = this.regressionResultByAssetCode.get(asset.code);
+                this.monthlyPredictionsByAssetCode.set(asset.code,
+                    historicalPriceAnalysisService.generateMonthlyPredictions(
+                        regressionResult, config.scope.endYearMonth));
             }
         }
     }

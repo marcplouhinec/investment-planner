@@ -10,8 +10,8 @@ const simulationConfigService = {
     /**
      * @param {SimulationConfig} simulationConfig
      */
-    updateSimulation: function (simulationConfig) {
-        this._simulation.update(simulationConfig);
+    updateSimulation: async function (simulationConfig) {
+        await this._simulation.update(simulationConfig);
         this._configUpdatedListeners.forEach(it => it(this._simulation));
     },
 

@@ -1,27 +1,11 @@
 import {Chart} from '../../../vendors/chart.js-3.3.2/dist/chart.esm.js';
 import {simulationConfigService} from '../../service/simulationConfigService.js';
-import {historicalPriceReadingService} from '../../service/historicalPriceReadingService.js';
-import {historicalPriceAnalysisService} from '../../service/historicalPriceAnalysisService.js';
-import {Asset} from '../../model/Asset.js';
-import {HistoricalPrice} from '../../model/HistoricalPrice.js';
 import {chartColorUtils} from "../utils/chartColorUtils.js";
 import {YearMonth} from "../../model/YearMonth.js";
-import {RegressionResult} from "../../model/RegressionResult.js";
+import {Simulation} from "../../model/Simulation.js";
 
 const portfolioSimulationController = {
 
-    /** @type {Map<string, Asset>} */
-    _assetByCode: new Map(),
-    /** @type {Map<Asset, HistoricalPrice[]>} */
-    _historicalPricesByAsset: new Map(),
-    /** @type {Map<Asset, {yearMonth: YearMonth, historicalPrice: HistoricalPrice}[]>} */
-    _monthlyHistoricalPricesByAsset: new Map(),
-    /** @type {Map<Asset, {performance: number, stdDev: number}>} */
-    _annualizedPerfAndStdDevByAsset: new Map(),
-    /** @type {Map<Asset, RegressionResult>} */
-    _regressionResultByAsset: new Map(),
-    /** @type {Map<Asset, MonthlyPrediction[]>} */
-    _monthlyPredictionsByAsset: new Map(),
     /** @type {?Chart} */
     _assetPerfStdDevXyScatterChart: null,
     /** @type {?Chart} */
@@ -32,76 +16,19 @@ const portfolioSimulationController = {
     init: function () {
         // Listen to simulation config changes
         simulationConfigService.registerConfigUpdatedListener(async simulation => {
-            await this._refreshPortfolioSimulation(simulation.config);
+            await this._refreshPortfolioSimulation(simulation);
         });
     },
 
     /**
-     * @param {SimulationConfig} config
+     * @param {Simulation} simulation
      */
-    _refreshPortfolioSimulation: async function (config) {
-        // Map the asset by their code
-        for (let asset of config.assets) {
-            if (!this._assetByCode.has(asset.code)) {
-                this._assetByCode.set(asset.code, asset);
-            }
-        }
-
-        // Load the historical prices of all assets
-        for (let asset of config.assets) {
-            if (!this._historicalPricesByAsset.has(asset)) {
-                const prices = await historicalPriceReadingService.readHistoricalPrices(asset);
-                this._historicalPricesByAsset.set(asset, prices);
-            }
-        }
-        const startYearMonth = config.scope.startYearMonth;
-        const endYearMonth = config.scope.endYearMonth;
-        for (let asset of config.assets) {
-            if (!this._monthlyHistoricalPricesByAsset.has(asset)) {
-                const historicalPrices = this._historicalPricesByAsset.get(asset);
-                this._monthlyHistoricalPricesByAsset.set(
-                    asset, HistoricalPrice.findAllEveryMonthBetween(historicalPrices, startYearMonth, endYearMonth));
-            }
-        }
-
-        // Calculate the annualized performance and standard deviation for all assets
-        for (let asset of config.assets) {
-            if (!this._annualizedPerfAndStdDevByAsset.has(asset)) {
-                const prices = this._historicalPricesByAsset.get(asset);
-
-                this._annualizedPerfAndStdDevByAsset.set(asset, {
-                    performance: historicalPriceAnalysisService
-                        .calculateAnnualizedPerformance(prices, startYearMonth, endYearMonth),
-                    stdDev: historicalPriceAnalysisService
-                        .calculateAnnualizedPerformanceStandardDeviation(prices, startYearMonth, endYearMonth)
-                });
-            }
-        }
-
-        // Calculate a regression for all assets
-        for (let asset of config.assets) {
-            if (!this._regressionResultByAsset.has(asset)) {
-                const prices = this._historicalPricesByAsset.get(asset);
-
-                this._regressionResultByAsset.set(
-                    asset, historicalPriceAnalysisService.calculateRegression(prices, startYearMonth, endYearMonth));
-            }
-        }
-
-        // Calculate monthly predictions for all assets
-        for (let asset of config.assets) {
-            if (!this._monthlyPredictionsByAsset.has(asset)) {
-                const regressionResult = this._regressionResultByAsset.get(asset);
-                this._monthlyPredictionsByAsset.set(
-                    asset, historicalPriceAnalysisService.generateMonthlyPredictions(regressionResult, endYearMonth));
-            }
-        }
-
+    _refreshPortfolioSimulation: async function (simulation) {
         // Draw the asset performance / Standard Deviation XY scatter chart
         const assetPerfStdDevXyScatterChartData = {
-            datasets: config.assets.map((asset, index) => {
+            datasets: simulation.config.assets.map((asset, index) => {
                 const chartColor = chartColorUtils.getChartColorByIndex(index);
-                const annualizedPerfAndStdDev = this._annualizedPerfAndStdDevByAsset.get(asset);
+                const annualizedPerfAndStdDev = simulation.annualizedPerfAndStdDevByAssetCode.get(asset.code);
                 return {
                     label: asset.code,
                     data: [{
@@ -144,9 +71,9 @@ const portfolioSimulationController = {
 
         // Draw the asset monthly performance / Standard Error XY scatter chart
         const assetMonthlyPerfStdErrXyScatterChartData = {
-            datasets: config.assets.map((asset, index) => {
+            datasets: simulation.config.assets.map((asset, index) => {
                 const chartColor = chartColorUtils.getChartColorByIndex(index);
-                const result = this._regressionResultByAsset.get(asset);
+                const result = simulation.regressionResultByAssetCode.get(asset.code);
                 return {
                     label: asset.code,
                     data: [{
@@ -188,25 +115,23 @@ const portfolioSimulationController = {
         }
 
         // Draw the assets historical prices, regression line, and 95% envelope
-        const enabledInvestments = config.portfolioInvestments
-            .filter(investment => investment.enabled)
-            .filter(investment => this._assetByCode.has(investment.assetCode));
+        const enabledInvestments = simulation.config.portfolioInvestments
+            .filter(investment => investment.enabled);
 
         const chartStartYearMonth = enabledInvestments
             .map(investment => {
-                const asset = this._assetByCode.get(investment.assetCode);
-                const monthlyHistoricalPrices = this._monthlyHistoricalPricesByAsset.get(asset);
+                const monthlyHistoricalPrices = simulation.monthlyHistoricalPricesByAssetCode.get(investment.assetCode);
 
                 return monthlyHistoricalPrices[0].yearMonth;
             })
             .reduce((minYearMonth, currentValue) =>
                 minYearMonth && minYearMonth.isBefore(currentValue) ? minYearMonth : currentValue);
-        const yearMonths = YearMonth.generateRangeBetween(chartStartYearMonth, endYearMonth);
+        const yearMonths = YearMonth.generateRangeBetween(
+            chartStartYearMonth, simulation.config.scope.endYearMonth);
 
         const portfolioAssetPriceDatasets = enabledInvestments
             .map((investment, index) => {
-                const asset = this._assetByCode.get(investment.assetCode);
-                const monthlyHistoricalPrices = this._monthlyHistoricalPricesByAsset.get(asset);
+                const monthlyHistoricalPrices = simulation.monthlyHistoricalPricesByAssetCode.get(investment.assetCode);
                 const minYearMonth = monthlyHistoricalPrices[0].yearMonth;
                 const maxYearMonth = monthlyHistoricalPrices[monthlyHistoricalPrices.length - 1].yearMonth;
 
@@ -227,8 +152,7 @@ const portfolioSimulationController = {
 
         const regressionDataSet = enabledInvestments
             .flatMap((investment, index) => {
-                const asset = this._assetByCode.get(investment.assetCode);
-                const monthlyPredictions = this._monthlyPredictionsByAsset.get(asset);
+                const monthlyPredictions = simulation.monthlyPredictionsByAssetCode.get(investment.assetCode);
 
                 const monthlyPredictionByYearMonth = new Map();
                 for (let monthlyPrediction of monthlyPredictions) {

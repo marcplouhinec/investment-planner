@@ -16,12 +16,13 @@ const simulationConfigController = {
             .then(content => flask.updateCode(content));
 
         // Handle code update events
-        flask.onUpdate((code) => {
-            this._onCodeUpdated(code);
+        flask.onUpdate(code => {
+            this._onCodeUpdated(code)
+                .catch(error => console.log(error));
         });
     },
 
-    _onCodeUpdated: function (code) {
+    _onCodeUpdated: async function (code) {
         if (!code) {
             return;
         }
@@ -35,7 +36,7 @@ const simulationConfigController = {
         }
 
         if (simulationConfig) {
-            simulationConfigService.updateSimulation(simulationConfig);
+            await simulationConfigService.updateSimulation(simulationConfig);
             this._updateMessage('Simulation updated at ' + new Date().toISOString(), 'INFO');
         }
     },
