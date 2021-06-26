@@ -208,7 +208,7 @@ class Simulation {
             for (const januaryAllocation of januaryAllocations) {
                 const result = this.regressionResultByAssetCode.get(januaryAllocation.assetCode);
                 monthlyPerformance += result.monthlyPerformance * januaryAllocation.allocationRatio;
-                standardError += result.standardError * januaryAllocation.allocationRatio; // TODO probably not correct
+                standardError += result.standardError * januaryAllocation.allocationRatio;
             }
 
             portfolioMonthlyPerformanceAndStandardErrorPerYear.push({
@@ -264,17 +264,18 @@ class Simulation {
 
             // Predict the price of the portfolio
             const allocations = allocationsByYearMonth.get(yearMonth.toString());
-            let avgPriceInUsd = 0;
-            let lower95PriceInUsd = 0;
-            let upper95PriceInUsd = 0;
+            let monthlyPerformance = 0;
+            let standardError = 0;
             for (const allocation of allocations) {
-                const assetPrediction = predictionByYearMonthByAssetCode.get(allocation.assetCode).get(yearMonth.toString());
-
-                avgPriceInUsd += assetPrediction.avgPriceInUsd * allocation.allocationRatio;
-                lower95PriceInUsd += assetPrediction.lower95PriceInUsd * allocation.allocationRatio;
-                upper95PriceInUsd += assetPrediction.upper95PriceInUsd * allocation.allocationRatio;
+                const result = this.regressionResultByAssetCode.get(allocation.assetCode);
+                monthlyPerformance += allocation.allocationRatio * result.monthlyPerformance;
+                standardError += allocation.allocationRatio * result.standardError / result.startPriceInUsd;
             }
-            const prediction = new MonthlyPrediction(yearMonth, avgPriceInUsd, lower95PriceInUsd, upper95PriceInUsd);
+            const currentPrice = currentPriceByAssetCode.get(Simulation.PORTFOLIO_ASSET_CODE);
+            const avgPriceInUsd = currentPrice * (1 + monthlyPerformance);
+            const prediction = new MonthlyPrediction(yearMonth, avgPriceInUsd,
+                avgPriceInUsd - 2 * standardError,
+                avgPriceInUsd + 2 * standardError);
 
             currentPriceByAssetCode.set(Simulation.PORTFOLIO_ASSET_CODE, avgPriceInUsd);
             predictionByYearMonthByAssetCode
