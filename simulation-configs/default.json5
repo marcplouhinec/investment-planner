@@ -72,13 +72,15 @@
   },
   savings: [
     {
-      yearMonth: "2021-07",
-      amountInUsd: "3000"
+      startYearMonth: "2021-07",
+      periodInMonths: 3,
+      amountInUsd: 3000
     },
     {
-      yearMonth: "2021-10",
-      amountInUsd: "3000"
-    },
+      startYearMonth: "2050-01",
+      periodInMonths: 1,
+      amountInUsd: 0
+    }
   ],
   assets: [
     {

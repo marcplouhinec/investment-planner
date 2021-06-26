@@ -45,6 +45,12 @@ describe('simulationConfig', () => {
             assert.equal(portfolioInvestment.phase3EndYearMonth.month, 1);
             assert.equal(portfolioInvestment.enabled, true);
 
+            assert.equal(simulationConfig.savings.length, 2);
+            const saving = simulationConfig.savings[0];
+            assert.equal(saving.startYearMonth.toString(), "2021-07");
+            assert.equal(saving.periodInMonths, 3);
+            assert.equal(saving.amountInUsd, 3000);
+
             assert.equal(simulationConfig.assets.length, 5);
             const asset = simulationConfig.assets[0];
             assert.equal(asset.code, "TOTAL_STOCK_MARKET");
