@@ -11,6 +11,8 @@ const portfolioSimulationController = {
     /** @type {?Chart} */
     _assetMonthlyPerfStdErrXyScatterChart: null,
     /** @type {?Chart} */
+    _portfolioAssetPriceFromOneUsdLineChart: null,
+    /** @type {?Chart} */
     _portfolioAssetPriceLineChart: null,
 
     init: function () {
@@ -124,6 +126,78 @@ const portfolioSimulationController = {
                             }
                         }
                     }
+                }
+            );
+        }
+
+        // Draw the asset and portfolio prices with an initial investment of one USD
+        const assetPredictionByYearMonths = simulation.predictPortfolioAndAssetPricesStartingFromOneUsd();
+
+        const averagePriceFromOneUsdDatasets = assetPredictionByYearMonths.map((it, index) => {
+            const chartColor = chartColorUtils.getChartColorByIndex(index);
+            return {
+                label: it.assetCode + ' (regression)',
+                backgroundColor: chartColor.backgroundColor,
+                borderColor: chartColor.borderColor,
+                data: simulation.portfolioYearMonths.map(yearMonth => {
+                    const prediction = it.predictionByYearMonth.get(yearMonth.toString());
+                    return prediction.avgPriceInUsd;
+                })
+            };
+        });
+        const lower95PriceFromOneUsdDatasets = assetPredictionByYearMonths.map((it, index) => {
+            const chartColor = chartColorUtils.getChartColorByIndex(index);
+            return {
+                label: it.assetCode + ' (lower 95%)',
+                backgroundColor: chartColor.backgroundColor,
+                borderColor: chartColor.borderColor,
+                data: simulation.portfolioYearMonths.map(yearMonth => {
+                    const prediction = it.predictionByYearMonth.get(yearMonth.toString());
+                    return prediction.lower95PriceInUsd;
+                })
+            };
+        });
+        const upper95PriceFromOneUsdDatasets = assetPredictionByYearMonths.map((it, index) => {
+            const chartColor = chartColorUtils.getChartColorByIndex(index);
+            return {
+                label: it.assetCode + ' (upper 95%)',
+                backgroundColor: chartColor.backgroundColor,
+                borderColor: chartColor.borderColor,
+                data: simulation.portfolioYearMonths.map(yearMonth => {
+                    const prediction = it.predictionByYearMonth.get(yearMonth.toString());
+                    return prediction.upper95PriceInUsd;
+                })
+            };
+        });
+        const portfolioAssetPriceStartingFromOneUsdLineChartData = {
+            labels: simulation.portfolioYearMonths.map(it => it.toString()),
+            datasets: averagePriceFromOneUsdDatasets
+                .concat(lower95PriceFromOneUsdDatasets)
+                .concat(upper95PriceFromOneUsdDatasets)
+        };
+
+        if (this._portfolioAssetPriceFromOneUsdLineChart !== null) {
+            this._portfolioAssetPriceFromOneUsdLineChart.data = portfolioAssetPriceStartingFromOneUsdLineChartData;
+            this._portfolioAssetPriceFromOneUsdLineChart.update();
+        } else {
+            this._portfolioAssetPriceFromOneUsdLineChart = new Chart(
+                document.getElementById('asset-portfolio-price-from-one-usd-line-chart'),
+                {
+                    type: 'line',
+                    options: {
+                        pointRadius: 0,
+                        aspectRatio: 1,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Asset prices (USD) starting from one USD'
+                            }
+                        }
+                    },
+                    data: portfolioAssetPriceStartingFromOneUsdLineChartData
                 }
             );
         }

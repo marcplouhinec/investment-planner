@@ -1,12 +1,15 @@
 import {SimulationConfig} from './SimulationConfig.js';
 import {YearMonth} from "./YearMonth.js";
 import {PortfolioInvestment} from "./PortfolioInvestment.js";
+import {MonthlyPrediction} from "./MonthlyPrediction.js";
 import {MonthlyAssetAllocation} from "./MonthlyAssetAllocation.js";
 import {historicalPriceReadingService} from "../service/historicalPriceReadingService.js";
 import {HistoricalPrice} from "./HistoricalPrice.js";
 import {historicalPriceAnalysisService} from "../service/historicalPriceAnalysisService.js";
 
 class Simulation {
+
+    static PORTFOLIO_ASSET_CODE = 'PORTFOLIO'
 
     constructor() {
         /** @type {SimulationConfig} */
@@ -145,6 +148,30 @@ class Simulation {
     }
 
     /**
+     * Group monthly asset allocations by year month.
+     *
+     * @return {Map<string, MonthlyAssetAllocation[]>}
+     */
+    getPortfolioAllocationsByYearMonth() {
+        /** @type {Map<string, MonthlyAssetAllocation[]>} */
+        const allocationsByYearMonth = new Map();
+
+        for (let allocation of this.monthlyAssetAllocations) {
+            const formattedYearMonth = allocation.yearMonth.toString();
+            let allocations = allocationsByYearMonth.get(formattedYearMonth);
+
+            if (!allocations) {
+                allocations = [];
+                allocationsByYearMonth.set(formattedYearMonth, allocations);
+            }
+
+            allocations.push(allocation);
+        }
+
+        return allocationsByYearMonth;
+    }
+
+    /**
      * @return {{year: number, monthlyPerformance: number, standardError: number}[]}
      */
     getAllPortfolioMonthlyPerformanceAndStandardErrorPerYear() {
@@ -168,19 +195,7 @@ class Simulation {
         }
 
         // Group monthly asset allocations by year month
-        /** @type {Map<string, MonthlyAssetAllocation[]>} */
-        const allocationsByYearMonth = new Map();
-        for (let allocation of this.monthlyAssetAllocations) {
-            const formattedYearMonth = allocation.yearMonth.toString();
-            let allocations = allocationsByYearMonth.get(formattedYearMonth);
-
-            if (!allocations) {
-                allocations = [];
-                allocationsByYearMonth.set(formattedYearMonth, allocations);
-            }
-
-            allocations.push(allocation);
-        }
+        const allocationsByYearMonth = this.getPortfolioAllocationsByYearMonth();
 
         // Calculate the monthly performance and standard error per year
         /** @type {{year: number, monthlyPerformance: number, standardError: number}[]} */
@@ -193,7 +208,7 @@ class Simulation {
             for (const januaryAllocation of januaryAllocations) {
                 const result = this.regressionResultByAssetCode.get(januaryAllocation.assetCode);
                 monthlyPerformance += result.monthlyPerformance * januaryAllocation.allocationRatio;
-                standardError += result.standardError * januaryAllocation.allocationRatio;
+                standardError += result.standardError * januaryAllocation.allocationRatio; // TODO probably not correct
             }
 
             portfolioMonthlyPerformanceAndStandardErrorPerYear.push({
@@ -202,6 +217,81 @@ class Simulation {
         }
 
         return portfolioMonthlyPerformanceAndStandardErrorPerYear;
+    }
+
+    /**
+     * Predict the prices of a portfolio and each of its assets, with an initial investment of one USD.
+     * <br/>
+     * Note that the portfolio asset code is PORTFOLIO.
+     *
+     * @return {{assetCode: string, predictionByYearMonth: Map<string, MonthlyPrediction>}[]}
+     */
+    predictPortfolioAndAssetPricesStartingFromOneUsd() {
+        const allocationsByYearMonth = this.getPortfolioAllocationsByYearMonth();
+
+        // Initialize the price of all assets and portfolio to one USD
+        /** @type {Map<string, Map<string, MonthlyPrediction>>} */
+        const predictionByYearMonthByAssetCode = new Map();
+        /** @type {Map<string, number>} */
+        let currentPriceByAssetCode = new Map();
+        /** @type {string[]} */
+        const assetCodes = [];
+        for (const investment of this.config.portfolioInvestments) {
+            if (investment.enabled) {
+                assetCodes.push(investment.assetCode);
+                currentPriceByAssetCode.set(investment.assetCode, 1);
+                predictionByYearMonthByAssetCode.set(investment.assetCode, new Map());
+            }
+        }
+        currentPriceByAssetCode.set(Simulation.PORTFOLIO_ASSET_CODE, 1);
+        predictionByYearMonthByAssetCode.set(Simulation.PORTFOLIO_ASSET_CODE, new Map());
+
+        // Predict the price of each asset and portfolio for each month
+        for (const yearMonth of this.portfolioYearMonths) {
+            // Predict the price of each asset separately
+            for (const assetCode of assetCodes) {
+                const currentPrice = currentPriceByAssetCode.get(assetCode);
+
+                const result = this.regressionResultByAssetCode.get(assetCode);
+                const avgPriceInUsd = currentPrice * (1 + result.monthlyPerformance);
+                const prediction = new MonthlyPrediction(yearMonth, avgPriceInUsd,
+                    avgPriceInUsd - 2 * result.standardError / result.startPriceInUsd,
+                    avgPriceInUsd + 2 * result.standardError / result.startPriceInUsd);
+
+                currentPriceByAssetCode.set(assetCode, avgPriceInUsd);
+                predictionByYearMonthByAssetCode.get(assetCode).set(yearMonth.toString(), prediction);
+            }
+
+            // Predict the price of the portfolio
+            const allocations = allocationsByYearMonth.get(yearMonth.toString());
+            let avgPriceInUsd = 0;
+            let lower95PriceInUsd = 0;
+            let upper95PriceInUsd = 0;
+            for (const allocation of allocations) {
+                const assetPrediction = predictionByYearMonthByAssetCode.get(allocation.assetCode).get(yearMonth.toString());
+
+                avgPriceInUsd += assetPrediction.avgPriceInUsd * allocation.allocationRatio;
+                lower95PriceInUsd += assetPrediction.lower95PriceInUsd * allocation.allocationRatio;
+                upper95PriceInUsd += assetPrediction.upper95PriceInUsd * allocation.allocationRatio;
+            }
+            const prediction = new MonthlyPrediction(yearMonth, avgPriceInUsd, lower95PriceInUsd, upper95PriceInUsd);
+
+            currentPriceByAssetCode.set(Simulation.PORTFOLIO_ASSET_CODE, avgPriceInUsd);
+            predictionByYearMonthByAssetCode
+                .get(Simulation.PORTFOLIO_ASSET_CODE)
+                .set(yearMonth.toString(), prediction);
+        }
+
+        // Build the result
+        /** @type {{assetCode: string, predictionByYearMonth: Map<string, MonthlyPrediction>}[]} */
+        const assetPredictionByYearMonths = [];
+        for (const [assetCode, predictionByYearMonth] of predictionByYearMonthByAssetCode) {
+            assetPredictionByYearMonths.push({
+                assetCode: assetCode,
+                predictionByYearMonth: predictionByYearMonth
+            });
+        }
+        return assetPredictionByYearMonths;
     }
 }
 
