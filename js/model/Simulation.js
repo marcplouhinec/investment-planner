@@ -15,6 +15,9 @@ class Simulation {
         /** @type {SimulationConfig} */
         this.config = SimulationConfig.parseProperties({});
 
+        /** @type {Date|null} */
+        this.lastUpdatedDate = null;
+
         /**
          * YearMonths in which the portfolio is defined.
          * @type {YearMonth[]}
@@ -48,6 +51,7 @@ class Simulation {
      */
     async update(config) {
         this.config = config;
+        this.lastUpdatedDate = new Date();
 
         // Generate a range of months in which the portfolio is defined
         this.portfolioYearMonths = YearMonth.generateRangeBetween(
