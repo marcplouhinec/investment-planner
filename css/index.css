@@ -71,3 +71,14 @@ body {
 #sim-results > h1 {
     font-size: 1.5rem;
 }
+
+#monthly-prediction-table-wrapper {
+    height: 600px;
+    overflow-y: auto;
+}
+
+#monthly-prediction-table-wrapper thead th {
+    position: sticky;
+    top: 0;
+    background-color: white;
+}

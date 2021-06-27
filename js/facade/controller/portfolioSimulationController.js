@@ -16,12 +16,17 @@ const portfolioSimulationController = {
     _portfolioAssetPriceLineChart: null,
     /** @type {?Chart} */
     _portfolioPriceLineChart: null,
+    /** @type {HTMLTableElement} */
+    _monthlyPredictionTable: null,
 
     init: function () {
         // Listen to simulation config changes
         simulationConfigService.registerConfigUpdatedListener(async simulation => {
             await this._refreshPortfolioSimulation(simulation);
         });
+
+        this._monthlyPredictionTable =
+            /** @type {HTMLTableElement} */ document.getElementById('monthly-prediction-table');
     },
 
     /**
@@ -402,8 +407,49 @@ const portfolioSimulationController = {
                 }
             );
         }
-    }
 
+        // Update the monthly prediction table
+        const oldTBodies = this._monthlyPredictionTable.getElementsByTagName('tbody');
+        this._monthlyPredictionTable.removeChild(oldTBodies.item(0));
+        const tbody = document.createElement('tbody');
+
+        let lastAvgPriceInUsd = 0;
+        const numberFormat = new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'});
+        for (const yearMonth of simulation.portfolioYearMonths) {
+            const formattedYearMonth = yearMonth.toString();
+            const prediction = portfolioPredictionByYearMonth.get(formattedYearMonth);
+            const tr = document.createElement('tr');
+
+            let td = document.createElement('td');
+            td.textContent = formattedYearMonth;
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            td.textContent = numberFormat.format(simulation.savedAmountInUsdPerYearMonth.get(formattedYearMonth));
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            td.textContent = numberFormat.format(prediction.avgPriceInUsd);
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            td.textContent = numberFormat.format(prediction.lower95PriceInUsd);
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            td.textContent = numberFormat.format(prediction.upper95PriceInUsd);
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            td.textContent = numberFormat.format(prediction.avgPriceInUsd - lastAvgPriceInUsd);
+            tr.appendChild(td);
+            lastAvgPriceInUsd = prediction.avgPriceInUsd;
+
+            tbody.appendChild(tr);
+        }
+
+        this._monthlyPredictionTable.appendChild(tbody);
+    }
 };
 
 export {portfolioSimulationController};
