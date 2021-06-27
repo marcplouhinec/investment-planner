@@ -14,6 +14,13 @@ describe('simulationConfig', () => {
 
             assert.equal(simulationConfig.portfolioInvestments.length, 0);
 
+            assert.equal(simulationConfig.retirement.startYearMonth.year, 0);
+            assert.equal(simulationConfig.retirement.startYearMonth.month, 0);
+            assert.equal(simulationConfig.retirement.monthlyPensionInUsd, 0);
+            assert.equal(simulationConfig.retirement.pensionAnnualInflation, 0);
+
+            assert.equal(simulationConfig.savings.length, 0);
+
             assert.equal(simulationConfig.assets.length, 0);
         });
 
@@ -44,6 +51,10 @@ describe('simulationConfig', () => {
             assert.equal(portfolioInvestment.phase3EndYearMonth.year, 2065);
             assert.equal(portfolioInvestment.phase3EndYearMonth.month, 1);
             assert.equal(portfolioInvestment.enabled, true);
+
+            assert.equal(simulationConfig.retirement.startYearMonth.toString(), '2050-01');
+            assert.equal(simulationConfig.retirement.monthlyPensionInUsd, 5000);
+            assert.equal(simulationConfig.retirement.pensionAnnualInflation, 0.03);
 
             assert.equal(simulationConfig.savings.length, 2);
             const saving = simulationConfig.savings[0];
