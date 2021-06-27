@@ -14,6 +14,8 @@ const portfolioSimulationController = {
     _portfolioAssetPriceFromOneUsdLineChart: null,
     /** @type {?Chart} */
     _portfolioAssetPriceLineChart: null,
+    /** @type {?Chart} */
+    _portfolioPriceLineChart: null,
 
     init: function () {
         // Listen to simulation config changes
@@ -238,7 +240,7 @@ const portfolioSimulationController = {
                 };
             });
 
-        const regressionDataSet = enabledInvestments
+        const regressionDataSets = enabledInvestments
             .flatMap((investment, index) => {
                 const monthlyPredictions = simulation.monthlyPredictionsByAssetCode.get(investment.assetCode);
 
@@ -290,7 +292,7 @@ const portfolioSimulationController = {
 
         const portfolioAssetPriceLineChartData = {
             labels: yearMonths.map(it => it.toString()),
-            datasets: portfolioAssetPriceDatasets.concat(regressionDataSet)
+            datasets: portfolioAssetPriceDatasets.concat(regressionDataSets)
         };
 
         if (this._portfolioAssetPriceLineChart !== null) {
@@ -315,6 +317,88 @@ const portfolioSimulationController = {
                         }
                     },
                     data: portfolioAssetPriceLineChartData
+                }
+            );
+        }
+
+        // Draw the portfolio price
+        /** @type {Map<string, MonthlyPrediction>} */
+        const portfolioPredictionByYearMonth = simulation.predictPortfolioPrices();
+        let accumulatedSavings = 0;
+        const portfolioPredictionDatasets = [
+            {
+                label: 'PORTFOLIO',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgb(255, 99, 132)',
+                data: yearMonths.map(yearMonth => {
+                    const monthlyPrediction = portfolioPredictionByYearMonth.get(yearMonth.toString());
+                    if (!monthlyPrediction) {
+                        return null;
+                    }
+                    return monthlyPrediction.avgPriceInUsd;
+                })
+            },
+            {
+                label: 'PORTFOLIO (lower 95%)',
+                backgroundColor: chartColorUtils.getChartColorByIndex(0).backgroundColor,
+                borderColor: chartColorUtils.getChartColorByIndex(0).borderColor,
+                data: yearMonths.map(yearMonth => {
+                    const monthlyPrediction = portfolioPredictionByYearMonth.get(yearMonth.toString());
+                    if (!monthlyPrediction) {
+                        return null;
+                    }
+                    return monthlyPrediction.lower95PriceInUsd;
+                })
+            },
+            {
+                label: 'PORTFOLIO (upper 95%)',
+                backgroundColor: chartColorUtils.getChartColorByIndex(1).backgroundColor,
+                borderColor: chartColorUtils.getChartColorByIndex(1).borderColor,
+                data: yearMonths.map(yearMonth => {
+                    const monthlyPrediction = portfolioPredictionByYearMonth.get(yearMonth.toString());
+                    if (!monthlyPrediction) {
+                        return null;
+                    }
+                    return monthlyPrediction.upper95PriceInUsd;
+                })
+            },
+            {
+                label: 'ACCUMULATED SAVINGS',
+                backgroundColor: chartColorUtils.getChartColorByIndex(2).backgroundColor,
+                borderColor: chartColorUtils.getChartColorByIndex(2).borderColor,
+                data: yearMonths.map(yearMonth => {
+                    accumulatedSavings += simulation.savedAmountInUsdPerYearMonth.get(yearMonth.toString()) || 0;
+                    return accumulatedSavings;
+                })
+            }];
+
+        const portfolioPriceLineChartData = {
+            labels: yearMonths.map(it => it.toString()),
+            datasets: portfolioPredictionDatasets
+        };
+
+        if (this._portfolioPriceLineChart !== null) {
+            this._portfolioPriceLineChart.data = portfolioPriceLineChartData;
+            this._portfolioPriceLineChart.update();
+        } else {
+            this._portfolioPriceLineChart = new Chart(
+                document.getElementById('portfolio-price-line-chart'),
+                {
+                    type: 'line',
+                    options: {
+                        pointRadius: 0,
+                        aspectRatio: 1,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Portfolio price (USD)'
+                            }
+                        }
+                    },
+                    data: portfolioPriceLineChartData
                 }
             );
         }

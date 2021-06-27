@@ -38,6 +38,9 @@ class Simulation {
 
         /** @type {Map<string, MonthlyPrediction[]>} */
         this.monthlyPredictionsByAssetCode = new Map();
+
+        /** @type {Map<string, number>} */
+        this.savedAmountInUsdPerYearMonth = new Map();
     }
 
     /**
@@ -124,6 +127,37 @@ class Simulation {
                     historicalPriceAnalysisService.generateMonthlyPredictions(
                         regressionResult, config.scope.endYearMonth));
             }
+        }
+
+        // Calculate the saved amount of money every month
+        //this.savedAmountInUsdPerYearMonth
+        /** @type {YearMonth|null} */
+        let nextSavingStartYearMonth = this.config.savings.length === 0 ?
+            null : this.config.savings[0].startYearMonth;
+        let savingIndex = -1;
+        let nbMonthsSinceLastSaving = 0;
+        for (const yearMonth of this.portfolioYearMonths) {
+            // Check if the next saving period has started
+            if (nextSavingStartYearMonth
+                && (yearMonth.equals(nextSavingStartYearMonth) || yearMonth.isAfter(nextSavingStartYearMonth))) {
+                savingIndex++;
+                nextSavingStartYearMonth = savingIndex + 1 >= this.config.savings.length ?
+                    null : this.config.savings[savingIndex + 1].startYearMonth;
+                nbMonthsSinceLastSaving = 0;
+            }
+
+            /** @type {null|Saving} */
+            let saving = savingIndex < 0 || savingIndex >= this.config.savings.length ?
+                null : this.config.savings[savingIndex];
+
+            let savedAmount = 0;
+            if (saving) {
+                if (nbMonthsSinceLastSaving === 0) {
+                    savedAmount = saving.amountInUsd;
+                }
+                nbMonthsSinceLastSaving = (nbMonthsSinceLastSaving + 1) % saving.periodInMonths;
+            }
+            this.savedAmountInUsdPerYearMonth.set(yearMonth.toString(), savedAmount);
         }
     }
 
@@ -293,6 +327,84 @@ class Simulation {
             });
         }
         return assetPredictionByYearMonths;
+    }
+
+    /**
+     * Predict the prices of the portfolio.
+     *
+     * @return {Map<string, MonthlyPrediction>} Prediction by {@link YearMonth}.
+     */
+    predictPortfolioPrices() {
+        /** @type {Map<string, MonthlyPrediction>} */
+        const portfolioPredictionByYearMonth = new Map();
+
+        // Initialize the amount of money invested in each asset to zero
+        /** @type {Map<string, MonthlyPrediction>} */
+        let currentPredictionByAssetCode = new Map();
+        /** @type {string[]} */
+        const assetCodes = [];
+        for (const investment of this.config.portfolioInvestments) {
+            if (investment.enabled) {
+                assetCodes.push(investment.assetCode);
+                currentPredictionByAssetCode.set(investment.assetCode,
+                    new MonthlyPrediction(null, 0, 0, 0));
+            }
+        }
+
+        // Predict the portfolio price every month
+        const allocationsByYearMonth = this.getPortfolioAllocationsByYearMonth();
+        for (const yearMonth of this.portfolioYearMonths) {
+            // Include the monthly performance for each asset
+            for (const assetCode of assetCodes) {
+                const currentPrediction = currentPredictionByAssetCode.get(assetCode);
+                const result = this.regressionResultByAssetCode.get(assetCode);
+                const avgPriceInUsd = currentPrediction.avgPriceInUsd * (1 + result.monthlyPerformance);
+
+                const prediction = new MonthlyPrediction(yearMonth, avgPriceInUsd,
+                    avgPriceInUsd - 2 * result.standardError / result.startPriceInUsd * avgPriceInUsd,
+                    avgPriceInUsd + 2 * result.standardError / result.startPriceInUsd * avgPriceInUsd);
+                currentPredictionByAssetCode.set(assetCode, prediction);
+            }
+
+            // Calculate the total amount of invested money
+            let portfolioPrice = this.savedAmountInUsdPerYearMonth.get(yearMonth.toString());
+            for (const [assetCode, prediction] of currentPredictionByAssetCode) {
+                portfolioPrice += prediction.avgPriceInUsd;
+            }
+
+            /** @type {Map<string, MonthlyAssetAllocation>} */
+            const allocationByAssetCode = new Map();
+            const allocations = allocationsByYearMonth.get(yearMonth.toString());
+            for (const allocation of allocations) {
+                allocationByAssetCode.set(allocation.assetCode, allocation);
+            }
+
+            // Reallocate the total amount (invested + saved) to the different assets
+            for (const assetCode of assetCodes) {
+                const allocation = allocationByAssetCode.get(assetCode);
+                const prediction = currentPredictionByAssetCode.get(assetCode);
+                const result = this.regressionResultByAssetCode.get(assetCode);
+
+                prediction.avgPriceInUsd = portfolioPrice * (allocation ? allocation.allocationRatio : 0);
+                const standardError = result.standardError / result.startPriceInUsd * prediction.avgPriceInUsd;
+                prediction.lower95PriceInUsd = prediction.avgPriceInUsd - 2 * standardError;
+                prediction.upper95PriceInUsd = prediction.avgPriceInUsd + 2 * standardError;
+            }
+
+            // Calculate the portfolio prediction for this month
+            let avgPrice = 0;
+            let lower95Price = 0;
+            let upper95Price = 0;
+            for (const [assetCode, prediction] of currentPredictionByAssetCode) {
+                avgPrice += prediction.avgPriceInUsd;
+                lower95Price += prediction.lower95PriceInUsd;
+                upper95Price += prediction.upper95PriceInUsd;
+            }
+            portfolioPredictionByYearMonth.set(
+                yearMonth.toString(), new MonthlyPrediction(yearMonth, avgPrice, lower95Price, upper95Price));
+        }
+
+        return portfolioPredictionByYearMonth;
     }
 }
 
