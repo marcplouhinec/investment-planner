@@ -24,6 +24,12 @@ class Simulation {
          */
         this.portfolioYearMonths = [];
 
+        /**
+         * YearMonths in which the retirement is defined.
+         * @type {YearMonth[]}
+         */
+        this.retirementYearMonths = [];
+
         /** @type {MonthlyAssetAllocation[]} */
         this.monthlyAssetAllocations = [];
 
@@ -44,6 +50,9 @@ class Simulation {
 
         /** @type {Map<string, number>} */
         this.savedAmountInUsdPerYearMonth = new Map();
+
+        /** @type {Map<string, number>} */
+        this.retirementPensionInUsdPerYearMonth = new Map();
     }
 
     /**
@@ -162,6 +171,16 @@ class Simulation {
                 nbMonthsSinceLastSaving = (nbMonthsSinceLastSaving + 1) % saving.periodInMonths;
             }
             this.savedAmountInUsdPerYearMonth.set(yearMonth.toString(), savedAmount);
+        }
+
+        // Calculate the retirement pension every month
+        this.retirementYearMonths = YearMonth.generateRangeBetween(
+            config.retirement.startYearMonth, config.scope.endYearMonth);
+        const pensionMonthlyInflation = Math.pow(1 + config.retirement.pensionAnnualInflation, 1 / 12) - 1;
+        let monthlyPension = config.retirement.monthlyPensionInUsd;
+        for (const yearMonth of this.retirementYearMonths) {
+            this.retirementPensionInUsdPerYearMonth.set(yearMonth.toString(), monthlyPension);
+            monthlyPension = monthlyPension * (1 + pensionMonthlyInflation);
         }
     }
 
@@ -374,6 +393,12 @@ class Simulation {
             let portfolioPrice = this.savedAmountInUsdPerYearMonth.get(yearMonth.toString());
             for (const [assetCode, prediction] of currentPredictionByAssetCode) {
                 portfolioPrice += prediction.avgPriceInUsd;
+            }
+
+            // Remove the retirement pension
+            const retirementPensionInUsd = this.retirementPensionInUsdPerYearMonth.get(yearMonth.toString());
+            if (retirementPensionInUsd) {
+                portfolioPrice -= retirementPensionInUsd;
             }
 
             /** @type {Map<string, MonthlyAssetAllocation>} */

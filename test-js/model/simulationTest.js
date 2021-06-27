@@ -37,4 +37,25 @@ describe('Simulation', () => {
             assert.equal(simulation.savedAmountInUsdPerYearMonth.get(yearMonth.toString()), 0);
         });
     });
+
+    describe('#retirementPensionInUsdPerYearMonth', () => {
+        it('should work with default config', async function () {
+            const response = await fetch('simulation-configs/default.json5');
+            const code = await response.text();
+            const simulationConfig = SimulationConfig.parseProperties(JSON5.parse(code));
+
+            const simulation = new Simulation();
+            await simulation.update(simulationConfig);
+
+            assert.equal(simulation.retirementPensionInUsdPerYearMonth.size, simulation.retirementYearMonths.length);
+
+            assert.equal(simulation.retirementYearMonths[0].toString(), '2050-01');
+            assert.equal(simulation.retirementYearMonths[simulation.retirementYearMonths.length - 1].toString(), '2065-01');
+
+            let yearMonth = simulation.retirementYearMonths[0];
+            assert.equal(simulation.retirementPensionInUsdPerYearMonth.get(yearMonth.toString()), 5000);
+            yearMonth = yearMonth.nextMonth();
+            assert.equal(simulation.retirementPensionInUsdPerYearMonth.get(yearMonth.toString()), 5012.331348861519);
+        });
+    });
 });

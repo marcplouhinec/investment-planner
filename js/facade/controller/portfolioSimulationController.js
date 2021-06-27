@@ -330,6 +330,7 @@ const portfolioSimulationController = {
         /** @type {Map<string, MonthlyPrediction>} */
         const portfolioPredictionByYearMonth = simulation.predictPortfolioPrices();
         let accumulatedSavings = 0;
+        let accumulatedRetirementPension = 0;
         const portfolioPredictionDatasets = [
             {
                 label: 'PORTFOLIO',
@@ -374,6 +375,15 @@ const portfolioSimulationController = {
                 data: yearMonths.map(yearMonth => {
                     accumulatedSavings += simulation.savedAmountInUsdPerYearMonth.get(yearMonth.toString()) || 0;
                     return accumulatedSavings;
+                })
+            },
+            {
+                label: 'ACCUMULATED RETIREMENT PENSION',
+                backgroundColor: chartColorUtils.getChartColorByIndex(3).backgroundColor,
+                borderColor: chartColorUtils.getChartColorByIndex(3).borderColor,
+                data: yearMonths.map(yearMonth => {
+                    accumulatedRetirementPension += simulation.retirementPensionInUsdPerYearMonth.get(yearMonth.toString()) || 0;
+                    return accumulatedRetirementPension;
                 })
             }];
 
@@ -425,7 +435,9 @@ const portfolioSimulationController = {
             tr.appendChild(td);
 
             td = document.createElement('td');
-            td.textContent = numberFormat.format(simulation.savedAmountInUsdPerYearMonth.get(formattedYearMonth));
+            const retirementPension = simulation.retirementPensionInUsdPerYearMonth.get(formattedYearMonth) || 0;
+            const saving = simulation.savedAmountInUsdPerYearMonth.get(formattedYearMonth) || 0;
+            td.textContent = numberFormat.format(saving - retirementPension);
             tr.appendChild(td);
 
             td = document.createElement('td');
