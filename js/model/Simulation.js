@@ -386,7 +386,8 @@ class Simulation {
                 const result = this.regressionResultByAssetCode.get(assetCode);
 
                 prediction.avgPriceInUsd = portfolioPrice * (allocation ? allocation.allocationRatio : 0);
-                const standardError = result.standardError / result.startPriceInUsd * prediction.avgPriceInUsd;
+                const standardError = result.standardError / result.startPriceInUsd * prediction.avgPriceInUsd
+                    * (allocation ? allocation.allocationRatio : 0);
                 prediction.lower95PriceInUsd = prediction.avgPriceInUsd - 2 * standardError;
                 prediction.upper95PriceInUsd = prediction.avgPriceInUsd + 2 * standardError;
             }
