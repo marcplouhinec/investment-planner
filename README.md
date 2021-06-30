@@ -8,6 +8,9 @@ I have based my approach on several learning materials, such as
 [IFA.com](https://www.ifa.com/charts/), [Investopedia](https://www.investopedia.com/) and
 [The Money Guy Show](https://www.youtube.com/user/MoneyGuyShow).
 
+Thanks to GitHub Pages, this application
+is [directly available via this link](https://marcplouhinec.github.io/investment-planner/index.html).
+
 ## Architecture
 
 The main objective was to build something quickly, that is why there is no compilation or packaging step:
