@@ -1,0 +1,199 @@
+{
+  scope: {
+    startYearMonth: "1970-01",
+    endYearMonth: "2065-01"
+  },
+  portfolioInvestments: [
+    {
+      assetCode: "MSCI_WORLD",
+      phase1StartYearMonth: "2021-07",
+      phase1InitialWeight: 10,
+      phase1FinalWeight: 10,
+      phase2StartYearMonth: "2025-01",
+      phase2FinalWeight: 10,
+      phase3StartYearMonth: "2045-01",
+      phase3FinalWeight: 10,
+      phase3EndYearMonth: "2065-01",
+      enabled: true
+    },
+  ],
+  retirement: {
+    startYearMonth: "2050-01",
+    monthlyPensionInUsd: 5000,
+    pensionAnnualInflation: 0.03
+  },
+  savings: [
+    {
+      startYearMonth: "2021-07",
+      periodInMonths: 3,
+      amountInUsd: 3000
+    },
+    {
+      startYearMonth: "2050-01",
+      periodInMonths: 1,
+      amountInUsd: 0
+    }
+  ],
+  assets: [
+    {
+      code: "TOTAL_BOND_MARKET",
+      historicalPricesFormat: "YAHOO_FINANCE_MONTHLY",
+      historicalPricesPath: "investment-assets/Vanguard Total Bond Market Index Fund ETF Shares (BND).yf.csv"
+    },
+    {
+      code: "TOTAL_INTERNATIONAL_BOND",
+      historicalPricesFormat: "YAHOO_FINANCE_MONTHLY",
+      historicalPricesPath: "investment-assets/Vanguard Total International Bond Index Fund ETF Shares (BNDX).yf.csv"
+    },
+    {
+      code: "SHORT_TERM_INFLATION_PROTECTED_SECURITIES",
+      historicalPricesFormat: "YAHOO_FINANCE_MONTHLY",
+      historicalPricesPath: "investment-assets/Vanguard Short-Term Inflation-Protected Securities Index Fund ETF Shares (VTIP).yf.csv"
+    },
+    {
+      code: "MSCI_USA",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI USA Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_USA_SMALL_CAP",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI USA SMALL CAP Small Cap.msci.xls"
+    },
+    {
+      code: "MSCI_USA_VALUE",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI USA VALUE Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_ACWI_EX_USA",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI ACWI ex USA Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_EM",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI EM (EMERGING MARKETS) Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_EM_SMALL_CAP",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI EM (EMERGING MARKETS) SMALL CAP Small Cap.msci.xls"
+    },
+    {
+      code: "MSCI_EM_VALUE",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI EM (EMERGING MARKETS) VALUE Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_WORLD_EX_USA",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI WORLD ex USA Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_WORLD_EX_USA_SMALL_CAP",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI WORLD ex USA SMALL CAP Small Cap.msci.xls"
+    },
+    {
+      code: "MSCI_WORLD_EX_USA_VALUE",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI WORLD ex USA VALUE Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_CHINA",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI CHINA Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_CHINA_SMALL_CAP",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI CHINA SMALL CAP Small Cap.msci.xls"
+    },
+    {
+      code: "MSCI_CHINA_VALUE",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI CHINA VALUE Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_UK",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI UNITED KINGDOM Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_UK_SMALL_CAP",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI UNITED KINGDOM SMALL CAP Small Cap.msci.xls"
+    },
+    {
+      code: "MSCI_UK_VALUE",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI UNITED KINGDOM VALUE Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_JAPAN",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI JAPAN Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_JAPAN_SMALL_CAP",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI JAPAN SMALL CAP Small Cap.msci.xls"
+    },
+    {
+      code: "MSCI_JAPAN_VALUE",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI JAPAN VALUE Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_GERMANY",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI GERMANY Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_GERMANY_SMALL_CAP",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI GERMANY SMALL CAP Small Cap.msci.xls"
+    },
+    {
+      code: "MSCI_GERMANY_VALUE",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI GERMANY VALUE Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_INDIA",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI INDIA Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_INDIA_SMALL_CAP",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI INDIA SMALL CAP Small Cap.msci.xls"
+    },
+    {
+      code: "MSCI_INDIA_VALUE",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI INDIA VALUE Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_FRANCE",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI FRANCE Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_FRANCE_SMALL_CAP",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI FRANCE SMALL CAP Small Cap.msci.xls"
+    },
+    {
+      code: "MSCI_FRANCE_VALUE",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI FRANCE VALUE Standard (Large+Mid Cap).msci.xls"
+    },
+    {
+      code: "MSCI_WORLD",
+      historicalPricesFormat: "MSCI_MONTHLY",
+      historicalPricesPath: "investment-assets/MSCI WORLD Standard (Large+Mid Cap).msci.xls"
+    }
+  ]
+}
