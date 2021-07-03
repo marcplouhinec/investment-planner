@@ -71,6 +71,13 @@ const portfolioSimulationController = {
                             title: {
                                 display: true,
                                 text: 'Annualized Standard Deviation / Annualized performance (%)'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    footer: (tooltipItems) => {
+                                        return tooltipItems[0].dataset.label;
+                                    }
+                                }
                             }
                         }
                     }
@@ -117,6 +124,7 @@ const portfolioSimulationController = {
                     type: 'scatter',
                     data: assetMonthlyPerfStdErrXyScatterChartData,
                     options: {
+                        aspectRatio: 1,
                         scales: {
                             x: {
                                 type: 'linear',
@@ -130,6 +138,13 @@ const portfolioSimulationController = {
                             title: {
                                 display: true,
                                 text: 'Monthly Standard Error / Monthly performance (%)'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    footer: (tooltipItems) => {
+                                        return tooltipItems[0].dataset.label;
+                                    }
+                                }
                             }
                         }
                     }
