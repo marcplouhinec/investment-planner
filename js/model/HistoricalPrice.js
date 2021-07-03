@@ -37,8 +37,8 @@ class HistoricalPrice {
         // Make sure the range [startYearMonthIncl, endYearMonthIncl] doesn't exceed the historicalPrices
         const startDate = historicalPrices[0].date;
         const endDate = historicalPrices[historicalPrices.length - 1].date;
-        if (startYearMonthIncl.isBefore(startDate.toYearMonth())) {
-            startYearMonthIncl = startDate.toYearMonth();
+        if (startYearMonthIncl.isBefore(startDate.toClosestYearMonth())) {
+            startYearMonthIncl = startDate.toClosestYearMonth();
         }
         if (endYearMonthIncl.isAfter(endDate.toClosestYearMonth())) {
             endYearMonthIncl = endDate.toClosestYearMonth();

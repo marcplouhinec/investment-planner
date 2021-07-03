@@ -1,6 +1,8 @@
 import {HistoricalPrice} from '../../js/model/HistoricalPrice.js'
 import {YearMonth} from '../../js/model/YearMonth.js'
 import {LocalDate} from '../../js/model/LocalDate.js'
+import {Asset} from '../../js/model/Asset.js'
+import {historicalPriceReadingService} from "../../js/service/historicalPriceReadingService.js";
 
 const assert = chai.assert;
 const expect = chai.expect;
@@ -71,6 +73,21 @@ describe('HistoricalPrice', () => {
             assert.equal(mhPrices[0].historicalPrice.priceInUsd, 401);
             assert.equal(mhPrices[1].historicalPrice.priceInUsd, 501);
             assert.equal(mhPrices[2].historicalPrice.priceInUsd, 601);
+        });
+
+        it('should work with MSCI_ACWI_EX_USA', async () => {
+            const hPrices = await historicalPriceReadingService.readHistoricalPrices(new Asset(
+                'MSCI_ACWI_EX_USA',
+                'MSCI_MONTHLY',
+                'investment-assets/MSCI ACWI ex USA Standard (Large+Mid Cap).msci.xls'));
+
+            const mhPrices = HistoricalPrice.findAllEveryMonthBetween(
+                hPrices, YearMonth.parseString('1970-01'), YearMonth.parseString('2065-01'));
+            assert.equal(mhPrices.length, 400);
+            assert.equal(mhPrices[0].yearMonth.toString(), '1988-01');
+            assert.equal(mhPrices[0].historicalPrice.priceInUsd, 100);
+            assert.equal(mhPrices[399].yearMonth.toString(), '2021-04');
+            assert.equal(mhPrices[399].historicalPrice.priceInUsd, 336.074);
         });
     });
 });
