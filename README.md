@@ -4,9 +4,14 @@
 
 The goal of this personal project is to learn about long-term investment on the stock market.
 
-I have based my approach on several learning materials, such as
-[IFA.com](https://www.ifa.com/charts/), [Investopedia](https://www.investopedia.com/) and
-[The Money Guy Show](https://www.youtube.com/user/MoneyGuyShow).
+I have based my approach on several learning materials, such as:
+
+* [IFA.com](https://www.ifa.com/charts/)
+* [Investopedia](https://www.investopedia.com/)
+* [The Money Guy Show](https://www.youtube.com/user/MoneyGuyShow)
+* [Pensioncraft](https://www.youtube.com/c/Pensioncraft/videos)
+* [Ben Felix's channel](https://www.youtube.com/c/BenFelixCSI/videos)
+* [Bogleheads.org](https://www.bogleheads.org/)
 
 Thanks to GitHub Pages, this application
 is [directly available via this link](https://marcplouhinec.github.io/investment-planner/index.html).
