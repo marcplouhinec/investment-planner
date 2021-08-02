@@ -417,7 +417,6 @@ const portfolioSimulationController = {
                     type: 'line',
                     options: {
                         pointRadius: 0,
-                        aspectRatio: 1,
                         plugins: {
                             legend: {
                                 position: 'top'
